@@ -32,7 +32,7 @@ SECRET_KEY = env.str('SECRET_KEY', default='django-insecure-&)0dbnucsu)$f4pgxd0o
 DEBUG = env.bool('DEBUG', default=True)
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1', 'https://*.ngrok-free.app', 'https://fastcart.up.railway.app']
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=['http://127.0.0.1', 'http://localhost', 'https://*.ngrok-free.app', 'https://fastcart.up.railway.app'])
 SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
 
 # Application definition
@@ -95,12 +95,25 @@ WSGI_APPLICATION = 'ecom_prj.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Используем PostgreSQL если указаны переменные окружения, иначе SQLite для разработки
+if env.str('DB_HOST', default=None):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': env.str('DB_NAME', default='neostore_db'),
+            'USER': env.str('DB_USER', default='neostore_user'),
+            'PASSWORD': env.str('DB_PASSWORD', default='neostore_password'),
+            'HOST': env.str('DB_HOST', default='localhost'),
+            'PORT': env.str('DB_PORT', default='5432'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
