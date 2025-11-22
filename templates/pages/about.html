@@ -1,0 +1,67 @@
+{% extends 'partials/base.html' %} {% load static %} {% load humanize %} {% block content %}
+<div class="gray py-3">
+    <div class="container">
+        <div class="row">
+            <div class="colxl-12 col-lg-12 col-md-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'store:index' %}">Главная</a></li>
+                        <li class="breadcrumb-item"><a href="#">Страницы</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">О нас</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="middle">
+    <div class="container">
+        <div class="row align-items-center justify-content-between">
+        
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                <div class="abt_caption">
+                    <h2 class="ft-medium mb-4">О NEO Store</h2>
+                    <p class="mb-4">NEO Store - это современный интернет-магазин техники и электроники в Кыргызстане. Мы предлагаем широкий ассортимент качественных товаров по доступным ценам с гарантией качества и быстрой доставкой по всему Бишкеку и регионам страны.</p>
+                    <p class="mb-4">Наша миссия - сделать покупку техники простой, удобной и выгодной для каждого клиента. Мы работаем только с проверенными поставщиками и предлагаем оригинальную продукцию ведущих мировых брендов. В нашем каталоге вы найдете смартфоны, ноутбуки, планшеты, аксессуары и многое другое.</p>
+                    <div class="form-group mt-4">
+                        <a href="{% url 'store:shop' %}" class="btn bg-primary rounded btn-sm text-white">Перейти в магазин <i class="fas fa-shopping-cart ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                <div class="abt_caption">
+                    <img src="https://thelearningrooms.com/wps/wp-content/uploads/2015/02/team.jpg" class="img-fluid rounded" alt="Команда NEO Store" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="middle">
+    <div class="container">
+        <div class="row align-items-center justify-content-between">
+            
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                <div class="abt_caption">
+                    <img src="https://media.istockphoto.com/id/1434742171/photo/laptop-ppt-presentation-business-meeting-and-team-working-on-review-for-new-digital-website.jpg?s=612x612&w=0&k=20&c=MA7DEVo4nFIJPXgERQQx-W5srlaMThr_aFtDRaHeB00=" class="img-fluid rounded" alt="Наша миссия" />
+                </div>
+            </div>
+            
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                <div class="abt_caption">
+                    <h2 class="ft-medium mb-4">Наша миссия и видение</h2>
+                    <p class="mb-4"><strong>Миссия:</strong> Предоставлять нашим клиентам доступ к лучшим технологиям и электронике, делая покупки простыми, безопасными и выгодными. Мы стремимся к тому, чтобы каждый клиент получил именно то, что ищет, по лучшей цене и с отличным сервисом.</p>
+                    <p class="mb-4"><strong>Видение:</strong> Стать ведущим интернет-магазином техники в Кыргызстане, известным своим качественным сервисом, широким ассортиментом и лояльностью к клиентам. Мы постоянно развиваемся, внедряем новые технологии и улучшаем качество обслуживания, чтобы соответствовать самым высоким стандартам.</p>
+                    <div class="form-group mt-4">
+                        <a href="{% url 'store:shop' %}" class="btn bg-primary rounded btn-sm text-white">Узнать больше <i class="fas fa-arrow-right ms-2"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</section>
+
+
+{% endblock content %}
