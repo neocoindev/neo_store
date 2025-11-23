@@ -2,18 +2,32 @@
 set -e
 
 echo "Waiting for database..."
+max_attempts=60
+attempt=0
 while ! nc -z ${DB_HOST:-db} ${DB_PORT:-5432}; do
-  sleep 0.1
+  attempt=$((attempt + 1))
+  if [ $attempt -ge $max_attempts ]; then
+    echo "Database connection failed after $max_attempts attempts"
+    exit 1
+  fi
+  echo "Attempt $attempt/$max_attempts: Database is not ready yet. Waiting..."
+  sleep 1
 done
 echo "Database is ready!"
 
 # Применяем миграции
 echo "Running migrations..."
-python manage.py migrate --noinput
+python manage.py migrate --noinput || {
+    echo "Migration failed!"
+    exit 1
+}
 
 # Собираем статические файлы
 echo "Collecting static files..."
-python manage.py collectstatic --noinput
+python manage.py collectstatic --noinput || {
+    echo "Collectstatic failed!"
+    exit 1
+}
 
 # Создаем суперпользователя если не существует (опционально)
 if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then

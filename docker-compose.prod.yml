@@ -8,6 +8,10 @@ services:
     restart: always
     environment:
       - DEBUG=False
+    # Не монтируем код в продакшене (используем образ из Dockerfile)
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
     deploy:
       resources:
         limits:
@@ -16,9 +20,20 @@ services:
         reservations:
           cpus: '1'
           memory: 1G
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   db:
     restart: always
+    # Уберите ports для продакшена (безопасность)
+    # ports:
+    #   - "5432:5432"
+    # Рекомендуется использовать внешнюю БД в продакшене
+    # Для этого закомментируйте сервис db и используйте переменные окружения
     deploy:
       resources:
         limits:
@@ -27,18 +42,25 @@ services:
         reservations:
           cpus: '0.5'
           memory: 512M
-    # Уберите ports для продакшена (безопасность)
-    # ports:
-    #   - "5432:5432"
+    # Бэкапы БД (опционально)
+    # volumes:
+    #   - ./backups:/backups
 
   nginx:
     restart: always
     volumes:
       - ./nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
+      - static_volume:/static:ro
+      - media_volume:/media:ro
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"] || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
