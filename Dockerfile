@@ -38,16 +38,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Копируем установленные пакеты из builder
 COPY --from=builder /root/.local /root/.local
 
+# Копируем entrypoint скрипт отдельно и даем права на выполнение
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 # Копируем проект
 COPY . /app/
 
 # Создаем директории для статических файлов и медиа
 RUN mkdir -p /app/staticfiles /app/media && \
-    chmod -R 755 /app/staticfiles /app/media
-
-# Копируем и делаем исполняемым entrypoint скрипт
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+    chmod -R 755 /app/staticfiles /app/media && \
+    chmod +x /app/entrypoint.sh
 
 # Открываем порт
 EXPOSE 8000
