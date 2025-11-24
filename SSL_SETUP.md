@@ -13,23 +13,60 @@ sudo apt install certbot
 sudo yum install certbot
 ```
 
-### Шаг 2: Остановите контейнеры (временно)
+### Шаг 2: Проверьте DNS настройки
+
+**Важно:** Убедитесь, что домены указывают на правильный IP адрес сервера!
 
 ```bash
-cd ~/neo_store
-docker-compose down
+# Проверьте DNS записи
+nslookup neofoundation.io
+nslookup www.neofoundation.io
+
+# Должны показывать IP вашего сервера (например, 2.56.240.126)
 ```
 
-### Шаг 3: Получите сертификат
+### Шаг 3: Получите сертификат (метод webroot - работает с запущенным nginx)
 
-**Важно:** Замените `yourdomain.com` на ваш реальный домен!
+**Вариант A: С остановкой контейнеров (если DNS настроен правильно)**
 
 ```bash
-# Получение сертификата
-sudo certbot certonly --standalone -d yourdomain.com -d www.yourdomain.com
+# Остановите контейнеры
+cd ~/neo_store
+docker-compose down
 
-# Или если у вас только IP адрес (не рекомендуется, но возможно):
-# Сначала настройте домен на ваш IP, затем получите сертификат
+# Получите сертификат
+sudo certbot certonly --standalone -d neofoundation.io -d www.neofoundation.io
+
+# Запустите контейнеры обратно
+docker-compose up -d
+```
+
+**Вариант B: Без остановки контейнеров (рекомендуется)**
+
+```bash
+# Создайте директорию для webroot
+mkdir -p /var/www/certbot
+
+# Получите сертификат через webroot
+sudo certbot certonly --webroot \
+  -w /var/www/certbot \
+  -d neofoundation.io \
+  -d www.neofoundation.io
+
+# Убедитесь, что nginx.conf имеет блок для /.well-known/acme-challenge/
+# (он уже добавлен в конфигурацию)
+```
+
+**Вариант C: Использование nginx плагина (самый простой)**
+
+```bash
+# Установите certbot nginx плагин
+sudo apt install python3-certbot-nginx -y
+
+# Получите сертификат (certbot автоматически настроит nginx)
+sudo certbot --nginx -d neofoundation.io -d www.neofoundation.io
+
+# Но для Docker нужно будет скопировать сертификаты вручную
 ```
 
 ### Шаг 4: Создайте директорию для SSL сертификатов
