@@ -15,8 +15,12 @@ def default(request):
     except:
         wishlist_count = 0
 
-    # Get user currency
-    user_currency = get_user_currency(request)
+    # Get user currency with error handling
+    try:
+        user_currency = get_user_currency(request)
+    except Exception:
+        # Fallback to USD if currency detection fails
+        user_currency = 'USD'
 
     return {
         "total_cart_items": total_cart_items,
