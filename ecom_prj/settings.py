@@ -182,6 +182,45 @@ CACHES = {
 AUTH_USER_MODEL = 'userauths.User'
 
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'ecom_prj.middleware': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'plugin.currency': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
 # Stripe API Keys 
 # STRIPE_PUBLIC_KEY = env("STRIPE_PUBLIC_KEY")
 # STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
