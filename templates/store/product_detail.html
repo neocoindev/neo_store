@@ -3,12 +3,24 @@
     <div class="container">
         <div class="row">
             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
-                <div class="sp-loading"><img src="{{product.image.url}}" alt="" /><br />ЗАГРУЗКА ИЗОБРАЖЕНИЙ</div>
+                <div class="sp-loading">
+                    {% if product.image %}
+                        <img src="{{product.image.url}}" alt="" /><br />ЗАГРУЗКА ИЗОБРАЖЕНИЙ
+                    {% else %}
+                        <img src="/static/images/default-product.jpg" alt="" /><br />ЗАГРУЗКА ИЗОБРАЖЕНИЙ
+                    {% endif %}
+                </div>
                 <div class="sp-wrap">
-                    <a href="{{product.image.url}}"><img style="height: 600px; width: 100%; object-fit: cover; border-radius: 20px;" src="{{product.image.url}}" alt="" /></a>
+                    {% if product.image %}
+                        <a href="{{product.image.url}}"><img style="height: 600px; width: 100%; object-fit: cover; border-radius: 20px;" src="{{product.image.url}}" alt="" /></a>
+                    {% else %}
+                        <a href="/static/images/default-product.jpg"><img style="height: 600px; width: 100%; object-fit: cover; border-radius: 20px;" src="/static/images/default-product.jpg" alt="" /></a>
+                    {% endif %}
 
                     {% for image in product.gallery.all %}
-                    <a href="{{image.image.url}}"><img src="{{image.image.url}}" alt="" /></a>
+                        {% if image.image %}
+                            <a href="{{image.image.url}}"><img src="{{image.image.url}}" alt="" /></a>
+                        {% endif %}
                     {% endfor %}
                 </div>
             </div>

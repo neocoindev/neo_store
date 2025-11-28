@@ -287,7 +287,7 @@
                                     <a class="card-img-top d-block overflow-hidden"
                                        href="{% url 'store:product_detail' p.slug %}"><img class="card-img-top"
                                                                                            style="width: 100%; height: 230px; object-fit: cover;"
-                                                                                           src="{{ p.image.url }}"
+                                                                                           src="{% if p.image %}{{ p.image.url }}{% else %}/static/images/default-product.jpg{% endif %}"
                                                                                            alt="..."/></a>
                                 </div>
                             </div>

@@ -30,7 +30,13 @@
                                 <div class="col-xl-6 col-lg-5 col-md-5 col-12">
                                     <div class="cart_single d-flex align-items-start mfliud-bot gap-3">
                                         <div class="cart_selected_single_thumb">
-                                            <a href="{% url 'store:product_detail' item.product.slug %}"><img src="{{item.product.image.url}}" width="75" class="img-fluid rounded" alt="" /></a>
+                                            <a href="{% url 'store:product_detail' item.product.slug %}">
+                                                {% if item.product.image %}
+                                                    <img src="{{item.product.image.url}}" width="75" class="img-fluid rounded" alt="" />
+                                                {% else %}
+                                                    <img src="/static/images/default-product.jpg" width="75" class="img-fluid rounded" alt="No image" />
+                                                {% endif %}
+                                            </a>
                                         </div>
                                         <div class="cart_single_caption pl-3">
                                             <h4 class="product_title fs-sm ft-medium mb-1 lh-1"> <a href="{% url 'store:product_detail' item.product.slug %}">{{item.product.name}}</a></h4>
