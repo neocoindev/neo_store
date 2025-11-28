@@ -1,4 +1,4 @@
-{% extends 'partials/base.html' %} {% load static %} {% load humanize %} {% block content %}
+{% extends 'partials/base.html' %} {% load static %} {% load humanize %} {% load currency_tags %} {% block content %}
 
 <div class="gray py-3">
     <div class="container">
@@ -39,12 +39,14 @@
                                         <img src="{{item.product.image.url}}" alt="" style="width: 100px; height: 100px; object-fit: cover" />
                                         <div class="p-2">
                                             <h5>{{item.product.name}}</h5>
-                                            <p class="mb-0 mt-0">Цена: ${{item.price|intcomma}}</p>
+                                            {% load currency_tags %}
+                                            <p class="mb-0 mt-0">Цена: {% format_currency item.price %}</p>
                                             <p class="mb-0 mt-0">Продавец: {{item.product.vendor.profile.full_name}}</p>
                                         </div>
                                     </div> 
                                     <div class="col-lg-2">
-                                        <h4 class="fs-3">${{ item.price|intcomma }}</h4>
+                                        {% load currency_tags %}
+                                        <h4 class="fs-3">{% format_currency item.price %}</h4>
                                     </div>
                                     <div class="col-lg-2 d-flex">
                                         <button type="button" class="btn bg-primary text-white btn-sm update_cart_qty" data-update_type="decrease" data-product_id="{{item.product.id}}" data-item_id="{{item.id}}">-</button>
@@ -109,7 +111,7 @@
                         <div>
                             <div class="d-flex justify-content-between align-items-center">
                                 <p class="fw-semibold fs-6">Подытог</p>
-                                <p class="fs-6">$<span class="cart_sub_total">{{cart_sub_total|intcomma}}</span></p>
+                                <p class="fs-6"><span class="cart_sub_total">{% format_currency cart_sub_total %}</span></p>
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
                                 <p class="fw-semibold fs-6">Доставка</p>

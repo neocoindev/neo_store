@@ -1,5 +1,6 @@
 from store import models as store_models
 from customer import models as customer_models
+from plugin.currency import get_user_currency
 
 def default(request):
     category_ = store_models.Category.objects.all()
@@ -14,8 +15,12 @@ def default(request):
     except:
         wishlist_count = 0
 
+    # Get user currency
+    user_currency = get_user_currency(request)
+
     return {
         "total_cart_items": total_cart_items,
         "category_": category_,
         "wishlist_count": wishlist_count,
+        "user_currency": user_currency,
     }

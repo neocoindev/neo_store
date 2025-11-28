@@ -101,28 +101,29 @@
                 <div class="shadow rounded p-3 mt-5">
 
                     <div>
+                        {% load currency_tags %}
                         <div class="d-flex justify-content-between align-items-center">
                             <p class="fw-semibold fs-6">Подытог</p>
-                            <p class="fs-6">${{order.sub_total}}</p>
+                            <p class="fs-6">{% format_currency order.sub_total %}</p>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <p class="fw-semibold fs-6">Доставка</p>
-                            <p class="fs-6">${{order.shipping}}</p>
+                            <p class="fs-6">{% format_currency order.shipping %}</p>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <p class="fw-semibold fs-6">Налог</p>
-                            <p class="fs-6">${{order.tax}}</p>
+                            <p class="fs-6">{% format_currency order.tax %}</p>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center">
                             <p class="fw-semibold fs-6">Сервисный сбор</p>
-                            <p class="fs-6">${{order.service_fee}}</p>
+                            <p class="fs-6">{% format_currency order.service_fee %}</p>
                         </div>
                         
                         {% if order.saved %}
                             <div class="d-flex justify-content-between align-items-center">
                                 <p class="fw-semibold fs-6">Скидка</p>
-                                <p class="fs-6">${{order.saved}}</p>
+                                <p class="fs-6">{% format_currency order.saved %}</p>
                             </div>
                             
                             {% for coupon in order.coupons.all %}
@@ -132,7 +133,7 @@
 
                         <div class="d-flex justify-content-between align-items-center mt-3">
                             <p class="fw-bold text-dark fs-5">Итого</p>
-                            <p class="fw-bold text-dark fs-5">${{order.total}}</p>
+                            <p class="fw-bold text-dark fs-5">{% format_currency order.total %}</p>
                         </div>
                     </div>
                 </div>

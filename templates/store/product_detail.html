@@ -1,4 +1,4 @@
-{% extends 'partials/base.html' %} {% load static %} {% load humanize %} {% block content %}
+{% extends 'partials/base.html' %} {% load static %} {% load humanize %} {% load currency_tags %} {% block content %}
 <section class="middle">
     <div class="container">
         <div class="row">
@@ -44,8 +44,9 @@
                                 <span class="small ms-2">({{ product.reviews.all.count }} Отзывов)</span>
                             </div>
                             <div class="elis_rty mt-3">
-                                <span class="ft-medium text-muted line-through fs-md me-3"> {% if product.regular_price %} ${{product.regular_price}} {% endif %} </span>
-                                <span class="ft-bold theme-cl fs-lg me-3">${{product.price}}</span>
+                                {% load currency_tags %}
+                                <span class="ft-medium text-muted line-through fs-md me-3"> {% if product.regular_price %} {% format_currency product.regular_price %} {% endif %} </span>
+                                <span class="ft-bold theme-cl fs-lg me-3">{% format_currency product.price %}</span>
                                 <span class="ft-regular text-light bg-success py-1 px-2 fs-sm"> {% if product.stock > 0 %} В наличии {% else %} Нет в наличии {% endif %} </span>
                             </div>
                         </div>

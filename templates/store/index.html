@@ -1,4 +1,4 @@
-{% extends 'partials/base.html' %} {% load static %} {% load humanize %} {% block content %}
+{% extends 'partials/base.html' %} {% load static %} {% load humanize %} {% load currency_tags %} {% block content %}
     <section class="p-0 pb-5 mb-5">
         <div class="container">
 
@@ -39,6 +39,190 @@
         </div>
     </section>
 
+    <!-- Promotional Banner Section -->
+    <section class="promo-banner-section mt-5 mb-5">
+        <!-- Top Horizontal Strip - Full Width -->
+        <div class="promo-top-strip-wrapper">
+            <div class="container-fluid px-4">
+                <div class="promo-top-strip p-4 text-white d-flex justify-content-between align-items-center flex-wrap">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="promo-icons">
+                            <i class="fas fa-box fs-2 me-2"></i>
+                            <i class="fas fa-sunglasses fs-2"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0 fw-bold fs-5">Товары с местного склада Кыргызстана</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="promo-bubble bg-white text-dark rounded-pill px-4 py-2">
+                            <p class="mb-0 fw-bold">Быстрее и выгоднее</p>
+                        </div>
+                        <i class="fas fa-shoe-prints fs-2"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Three Column Banner - Full Width with Container -->
+        <div class="container-fluid px-4 mt-4">
+            <div class="row g-4">
+                <!-- Left Card - Fashion/Style -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="promo-card promo-card-green rounded-4 p-4 position-relative overflow-hidden h-100">
+                        <div class="promo-pattern"></div>
+                        <h3 class="text-dark fw-bold mb-3">Стильные вещи</h3>
+                        <div class="promo-product-image position-absolute bottom-0 end-0">
+                            <i class="fas fa-tshirt" style="font-size: 120px; opacity: 0.3; color: #4caf50;"></i>
+                        </div>
+                        <a href="{% url 'store:shop' %}?category=women" class="btn btn-light mt-3 rounded-pill">
+                            Смотреть коллекцию <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Middle Card - New Year Sale -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="promo-card promo-card-dark rounded-4 p-4 position-relative overflow-hidden h-100">
+                        <div class="promo-scene position-absolute end-0 bottom-0" style="opacity: 0.2;">
+                            <i class="fas fa-tree" style="font-size: 150px; color: #1cee5b;"></i>
+                        </div>
+                        <h2 class="text-white fw-bold mb-2">НОВОГОДНИЙ</h2>
+                        <h2 class="text-white fw-bold mb-3">декор со скидками</h2>
+                        <div class="promo-discount mb-3">
+                            <span class="text-white" style="font-size: 3rem; font-weight: 900;">до 90%</span>
+                        </div>
+                        <p class="text-white-50 small mb-3">С 19.11.2024 ПО 31.12.2025</p>
+                        <a href="{% url 'store:shop' %}?q=новогодний" class="btn bg-primary text-white rounded-pill">
+                            Купить сейчас <i class="fas fa-shopping-cart ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right Card - New Year Look -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="promo-card promo-card-purple rounded-4 p-4 position-relative overflow-hidden h-100">
+                        <div class="promo-circles"></div>
+                        <div class="promo-product-image position-absolute bottom-0 start-0">
+                            <i class="fas fa-tshirt" style="font-size: 140px; opacity: 0.3; color: #1cee5b; transform: rotate(-15deg);"></i>
+                        </div>
+                        <h3 class="text-white fw-bold mb-3 position-relative" style="z-index: 2;">НОВОГОДНИЙ</h3>
+                        <h3 class="text-white fw-bold mb-4 position-relative" style="z-index: 2;">образ</h3>
+                        <a href="{% url 'store:shop' %}?category=women" class="btn btn-light mt-3 rounded-pill position-relative" style="z-index: 2;">
+                            Выбрать наряд <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        /* Promotional Banner Styles */
+        .promo-banner-section {
+            padding: 0;
+            margin: 2rem 0;
+        }
+
+        /* Top Strip - Full Width */
+        .promo-top-strip-wrapper {
+            width: 100%;
+            background: linear-gradient(135deg, #FF0000 0%, #ff6b35 100%);
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+        }
+
+        .promo-top-strip {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .promo-bubble {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Promo Cards */
+        .promo-card {
+            min-height: 350px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .promo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Left Card - Green */
+        .promo-card-green {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            background-image: 
+                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(76, 175, 80, 0.05) 10px, rgba(76, 175, 80, 0.05) 20px);
+        }
+
+        /* Middle Card - Dark with New Year Theme */
+        .promo-card-dark {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2d2d2d 100%);
+            color: white;
+        }
+
+        .promo-discount {
+            background: linear-gradient(135deg, #FF0000 0%, #ff6b35 100%);
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+        }
+
+        /* Right Card - Purple Gradient */
+        .promo-card-purple {
+            background: linear-gradient(135deg, #9c27b0 0%, #673ab7 50%, #3f51b5 100%);
+            color: white;
+        }
+
+        .promo-circles::before,
+        .promo-circles::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .promo-circles::before {
+            width: 100px;
+            height: 100px;
+            top: 20px;
+            right: 20px;
+        }
+
+        .promo-circles::after {
+            width: 60px;
+            height: 60px;
+            top: 60px;
+            right: 60px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .promo-card {
+                min-height: 280px;
+            }
+            
+            .promo-top-strip {
+                text-align: center;
+            }
+            
+            .promo-top-strip > div {
+                width: 100%;
+                justify-content: center !important;
+                margin-bottom: 1rem;
+            }
+
+            .container-fluid.px-4 {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+        }
+    </style>
 
     <section class="middle mt-5">
         <div class="container">
@@ -140,8 +324,9 @@
                                                 <i class="fas fa-star text-warning"></i>
                                             {% endif %}
                                         </div>
+                                        {% load currency_tags %}
                                         <div class="elis_rty"><span
-                                                class="ft-bold text-dark fs-sm">${{ p.price }}</span></div>
+                                                class="ft-bold text-dark fs-sm">{% format_currency p.price %}</span></div>
                                     </div>
                                     <div class="d-flex align-items-center gap-3">
                                         <button type="button"

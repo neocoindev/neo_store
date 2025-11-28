@@ -133,7 +133,8 @@
                                 <div class="olf_flex_inner hide_mob">
                                     <p class="m-0 p-0"><span class="text-muted medium">Оплачено через {{order.payment_method}}</span></p>
                                 </div>
-                                <div class="float-end"><h5 class="mb-0 fs-sm ft-bold">Итого: ${{order.total|floatformat:2|intcomma}}</h5></div>
+                                {% load currency_tags %}
+                                <div class="float-end"><h5 class="mb-0 fs-sm ft-bold">Итого: {% format_currency order.total %}</h5></div>
                             </div>
                         </div>
                     </div>

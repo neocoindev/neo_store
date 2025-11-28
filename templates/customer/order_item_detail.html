@@ -1,5 +1,5 @@
 
-{% extends 'partials/base.html' %} {% load static %} {% load humanize %} {% block content %}
+{% extends 'partials/base.html' %} {% load static %} {% load humanize %} {% load currency_tags %} {% block content %}
 
 
 <div class="gray py-3">
@@ -55,7 +55,8 @@
                                                 {% endif %}
                                                     
                                             </p>
-                                            <h4 class="fs-sm ft-bold mb-0 lh-1">${{item.price}}</h4>
+                                            {% load currency_tags %}
+                                            <h4 class="fs-sm ft-bold mb-0 lh-1">{% format_currency item.price %}</h4>
                                         </div>
                                     </div>
                                 </div>

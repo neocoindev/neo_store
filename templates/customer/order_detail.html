@@ -77,15 +77,16 @@
                     <h4 class="mt-5 mb-2 fw-bold">Сводка заказа</h4>
                     <div class="">
                         <h5 class="mb-2 fs-sm"><span class="fw-bold">Дата:</span> {{order.date}}</h5>
-                        <h5 class="mb-2 fs-sm"><span class="fw-bold">Подытог:</span> ${{order.sub_total|intcomma}}</h5>
-                        <h5 class="mb-2 fs-sm"><span class="fw-bold">Доставка:</span> ${{order.shipping|intcomma}}</h5>
-                        <h5 class="mb-2 fs-sm"><span class="fw-bold">Налог:</span> ${{order.tax}}</h5>
+                        {% load currency_tags %}
+                        <h5 class="mb-2 fs-sm"><span class="fw-bold">Подытог:</span> {% format_currency order.sub_total %}</h5>
+                        <h5 class="mb-2 fs-sm"><span class="fw-bold">Доставка:</span> {% format_currency order.shipping %}</h5>
+                        <h5 class="mb-2 fs-sm"><span class="fw-bold">Налог:</span> {% format_currency order.tax %}</h5>
                         
                         {% if order.saved %}
-                        <h5 class="mb-2 fs-sm"><span class="fw-bold">Скидка:</span> -${{order.saved|intcomma}}</h5>
+                        <h5 class="mb-2 fs-sm"><span class="fw-bold">Скидка:</span> -{% format_currency order.saved %}</h5>
                         {% endif %}
                         
-                        <h5 class="mb-2 fs-sm"><span class="fw-bold">Итого:</span> ${{order.total|intcomma}}</h5>
+                        <h5 class="mb-2 fs-sm"><span class="fw-bold">Итого:</span> {% format_currency order.total %}</h5>
                     </div>
 
                     <h4 class="mt-5 mb-2 fw-bold">Личные данные</h4>
