@@ -37,15 +37,23 @@ def get_country_from_ip(ip_address):
         return 'US'
     
     # Fast path for local IPs - no API call needed
-    if ip_address == '127.0.0.1' or ip_address.startswith('192.168.') or ip_address.startswith('10.') or ip_address.startswith('172.'):
+    if ip_address == '127.0.0.1' or (isinstance(ip_address, str) and (
+        ip_address.startswith('192.168.') or 
+        ip_address.startswith('10.') or 
+        ip_address.startswith('172.')
+    )):
         # Local IP, default to Kyrgyzstan for testing
         return 'KG'
     
     # Check cache first
-    cache_key = f'ip_country_{ip_address}'
-    cached_country = cache.get(cache_key)
-    if cached_country:
-        return cached_country
+    try:
+        cache_key = f'ip_country_{ip_address}'
+        cached_country = cache.get(cache_key)
+        if cached_country:
+            return cached_country
+    except Exception:
+        # If cache fails, continue without cache
+        pass
     
     # Make API request with short timeout
     try:
@@ -60,11 +68,17 @@ def get_country_from_ip(ip_address):
             data = response.json()
             country_code = data.get('countryCode', 'US')
             # Cache for 24 hours
-            cache.set(cache_key, country_code, 86400)
+            try:
+                cache.set(cache_key, country_code, 86400)
+            except Exception:
+                pass  # If cache fails, continue without caching
             return country_code
-    except (requests.RequestException, ValueError, KeyError):
+    except (requests.RequestException, ValueError, KeyError, Exception):
         # If API fails, cache a default value for 1 hour to avoid repeated failures
-        cache.set(cache_key, 'US', 3600)
+        try:
+            cache.set(cache_key, 'US', 3600)
+        except Exception:
+            pass
         pass
     
     # Fallback to default
