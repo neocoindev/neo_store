@@ -281,7 +281,7 @@ $(document).ready(function () {
 
         $("input[name='search-filter']").val("");
 
-        Toast.fire({ icon: "success", title: "Filter Reset Successfully" });
+        Toast.fire({ icon: "success", title: "Фильтр успешно сброшен" });
 
         $.ajax({
             url: "/filter_products/",
