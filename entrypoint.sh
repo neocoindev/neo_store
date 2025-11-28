@@ -59,5 +59,7 @@ exec gunicorn ecom_prj.wsgi:application \
     --workers ${GUNICORN_WORKERS:-3} \
     --timeout 120 \
     --access-logfile - \
-    --error-logfile -
+    --error-logfile - \
+    --log-level debug \
+    --capture-output
 
