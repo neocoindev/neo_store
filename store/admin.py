@@ -60,6 +60,23 @@ class ReviewAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'product__name']
     list_filter = ['active', 'rating']
 
+class BannerAdmin(admin.ModelAdmin):
+    list_display = ['title', 'banner_type', 'status', 'order']
+    list_filter = ['banner_type', 'status']
+    search_fields = ['title']
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('banner_type', 'title', 'text', 'status', 'order')
+        }),
+        ('Кнопка', {
+            'fields': ('button_text', 'button_link')
+        }),
+        ('Внешний вид', {
+            'fields': ('image', 'background_color'),
+            'description': 'Рекомендуемые размеры изображений: Главный баннер - 1200x400px (ширина x высота), Малый баннер - 400x200px. Формат: JPG, PNG. Если изображение не загружено, будет использован цвет фона.'
+        }),
+    )
+
 admin.site.register(store_models.Category, CategoryAdmin)
 admin.site.register(store_models.Product, ProductAdmin)
 admin.site.register(store_models.Variant, VariantAdmin)
@@ -70,3 +87,4 @@ admin.site.register(store_models.Coupon, CouponAdmin)
 admin.site.register(store_models.Order, OrderAdmin)
 admin.site.register(store_models.OrderItem, OrderItemAdmin)
 admin.site.register(store_models.Review, ReviewAdmin)
+admin.site.register(store_models.Banner, BannerAdmin)

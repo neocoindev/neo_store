@@ -1,0 +1,311 @@
+/* ============================================
+   NEO Store - Custom Admin Panel Styling
+   ============================================ */
+
+/* Brand Colors */
+:root {
+    --neo-primary: #FF0000;
+    --neo-primary-hover: #cc0000;
+    --neo-primary-light: #ff3333;
+    --neo-dark: #1a1a1a;
+    --neo-light: #f8f8f8;
+}
+
+/* Header Branding */
+#branding h1,
+#branding h1 a:link,
+#branding h1 a:visited {
+    color: var(--neo-primary) !important;
+    font-weight: 700;
+    font-size: 24px;
+}
+
+#branding h1 a:hover {
+    color: var(--neo-primary-hover) !important;
+}
+
+/* Logo in Header */
+#branding img {
+    max-height: 50px;
+    width: auto;
+    margin-right: 10px;
+}
+
+/* Primary Buttons */
+.btn-primary,
+input[type="submit"].default,
+.submit-row input.default {
+    background-color: var(--neo-primary) !important;
+    border-color: var(--neo-primary) !important;
+    color: white !important;
+}
+
+.btn-primary:hover,
+input[type="submit"].default:hover,
+.submit-row input.default:hover {
+    background-color: var(--neo-primary-hover) !important;
+    border-color: var(--neo-primary-hover) !important;
+}
+
+/* Links */
+a:link,
+a:visited {
+    color: var(--neo-primary) !important;
+}
+
+a:hover {
+    color: var(--neo-primary-hover) !important;
+}
+
+/* Sidebar */
+#content-related {
+    background: var(--neo-light);
+}
+
+/* Module Headers */
+.module h2,
+.module caption,
+.inline-group h2 {
+    background: var(--neo-primary) !important;
+    color: white !important;
+}
+
+/* Selected Items */
+.selected {
+    background: var(--neo-primary-light) !important;
+}
+
+/* Action Buttons */
+.object-tools a {
+    background-color: var(--neo-primary) !important;
+    color: white !important;
+}
+
+.object-tools a:hover {
+    background-color: var(--neo-primary-hover) !important;
+}
+
+/* Form Fields Focus */
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="url"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--neo-primary) !important;
+    box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2) !important;
+}
+
+/* Save Buttons */
+.default,
+input[type="submit"].default,
+.submit-row input {
+    background: var(--neo-primary) !important;
+    border-color: var(--neo-primary) !important;
+}
+
+.default:hover,
+input[type="submit"].default:hover {
+    background: var(--neo-primary-hover) !important;
+    border-color: var(--neo-primary-hover) !important;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+    background: var(--neo-light) !important;
+}
+
+.breadcrumbs a {
+    color: var(--neo-primary) !important;
+}
+
+/* Messages */
+.messagelist .success {
+    background: #4caf50 !important;
+}
+
+.messagelist .error {
+    background: var(--neo-primary) !important;
+}
+
+/* Jazzmin Specific */
+.main-header .navbar-brand {
+    color: var(--neo-primary) !important;
+}
+
+.main-header .navbar-nav .nav-link:hover {
+    color: var(--neo-primary) !important;
+}
+
+/* Jazzmin Brand Colors */
+.navbar-danger {
+    background-color: var(--neo-primary) !important;
+}
+
+.navbar-danger .navbar-brand,
+.navbar-danger .navbar-nav .nav-link {
+    color: white !important;
+}
+
+.navbar-danger .navbar-nav .nav-link:hover {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.sidebar-light-danger .nav-sidebar > .nav-item > .nav-link.active {
+    background-color: var(--neo-primary) !important;
+    color: white !important;
+}
+
+.sidebar-light-danger .nav-sidebar > .nav-item > .nav-link:hover {
+    background-color: var(--neo-primary-light) !important;
+    color: white !important;
+}
+
+.accent-danger {
+    accent-color: var(--neo-primary) !important;
+}
+
+.btn-danger {
+    background-color: var(--neo-primary) !important;
+    border-color: var(--neo-primary) !important;
+}
+
+.btn-danger:hover {
+    background-color: var(--neo-primary-hover) !important;
+    border-color: var(--neo-primary-hover) !important;
+}
+
+/* Jazzmin Login Page */
+.login-page {
+    background: linear-gradient(135deg, #f8f8f8 0%, #ffffff 100%);
+}
+
+.login-box {
+    border-top: 4px solid var(--neo-primary) !important;
+}
+
+.login-box .login-logo h2 {
+    color: var(--neo-primary) !important;
+}
+
+.login-box .btn-primary {
+    background-color: var(--neo-primary) !important;
+    border-color: var(--neo-primary) !important;
+}
+
+.login-box .btn-primary:hover {
+    background-color: var(--neo-primary-hover) !important;
+    border-color: var(--neo-primary-hover) !important;
+}
+
+/* Login Page Customization */
+.login .form-row #id_username,
+.login .form-row #id_password {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 12px 15px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.login .form-row #id_username:focus,
+.login .form-row #id_password:focus {
+    border-color: var(--neo-primary) !important;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+}
+
+.login .submit-row input {
+    background: var(--neo-primary) !important;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+    transition: background 0.3s;
+}
+
+.login .submit-row input:hover {
+    background: var(--neo-primary-hover) !important;
+}
+
+/* Custom Login Page Branding */
+body.login {
+    background: linear-gradient(135deg, #f8f8f8 0%, #ffffff 100%);
+}
+
+.login #header {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 20px 0;
+}
+
+.login #header h1 {
+    margin: 0;
+}
+
+.login #header h1 a {
+    color: var(--neo-primary) !important;
+    font-size: 28px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.login #header h1 img {
+    max-height: 60px;
+    width: auto;
+    margin-right: 15px;
+    vertical-align: middle;
+}
+
+.login #content {
+    max-width: 450px;
+    margin: 40px auto;
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.login #content h1 {
+    color: var(--neo-dark);
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.login .form-row label {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.login .submit-row {
+    margin-top: 25px;
+    padding: 0;
+}
+
+/* Error Messages */
+.errorlist {
+    background: #fff3f3;
+    border-left: 4px solid var(--neo-primary);
+    padding: 10px 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+    color: var(--neo-primary);
+}
+
+/* Success Messages */
+.success {
+    background: #e8f5e9;
+    border-left: 4px solid #4caf50;
+    padding: 10px 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+    color: #2e7d32;
+}
+

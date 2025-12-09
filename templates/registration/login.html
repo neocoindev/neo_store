@@ -1,0 +1,136 @@
+{% extends "admin/login.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/custom_admin.css' %}">
+<style>
+    /* NEO Store Branded Login Page for Jazzmin */
+    body.login {
+        background: linear-gradient(135deg, #f8f8f8 0%, #ffffff 100%);
+        min-height: 100vh;
+    }
+    
+    .login-box {
+        max-width: 480px;
+        margin: 60px auto;
+        background: white;
+        padding: 50px 40px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        border-top: 4px solid #FF0000;
+    }
+    
+    .login-box .login-logo {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .login-box .login-logo img {
+        max-height: 80px;
+        width: auto;
+        margin-bottom: 15px;
+    }
+    
+    .login-box .login-logo h2 {
+        color: #FF0000;
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .login-box .login-logo p {
+        color: #666;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    
+    .login-box .card-body {
+        padding: 0;
+    }
+    
+    .login-box .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .login-box .form-group label {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 14px;
+    }
+    
+    .login-box .form-control {
+        width: 100%;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 14px 18px;
+        font-size: 16px;
+        transition: all 0.3s;
+        box-sizing: border-box;
+    }
+    
+    .login-box .form-control:focus {
+        border-color: #FF0000 !important;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+    }
+    
+    .login-box .btn-primary {
+        background: #FF0000 !important;
+        border: none !important;
+        border-radius: 8px;
+        padding: 14px 40px;
+        font-size: 16px;
+        font-weight: 600;
+        width: 100%;
+        color: white !important;
+        cursor: pointer;
+        transition: background 0.3s;
+        margin-top: 10px;
+    }
+    
+    .login-box .btn-primary:hover {
+        background: #cc0000 !important;
+    }
+    
+    .login-box .login-footer {
+        text-align: center;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .login-box .login-footer a {
+        color: #FF0000;
+        text-decoration: none;
+        font-size: 14px;
+    }
+    
+    .login-box .login-footer a:hover {
+        color: #cc0000;
+        text-decoration: underline;
+    }
+    
+    .alert-danger {
+        background: #fff3f3;
+        border-left: 4px solid #FF0000;
+        padding: 12px 15px;
+        margin: 15px 0;
+        border-radius: 4px;
+        color: #FF0000;
+        font-weight: 500;
+        border: none;
+    }
+</style>
+{% endblock %}
+
+{% block branding %}
+<div class="login-logo">
+    <img src="{% static 'assets/img/NEO-white.svg' %}" alt="NEO Store" />
+    <h2>NEO Store</h2>
+    <p>Панель управления</p>
+</div>
+{% endblock %}
+

@@ -282,3 +282,35 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.user.username} review on {self.product.name}"
+
+
+BANNER_TYPE = (
+    ("main", "Главный баннер"),
+    ("small", "Малый баннер"),
+)
+
+class Banner(models.Model):
+    banner_type = models.CharField(max_length=10, choices=BANNER_TYPE, default="main", verbose_name="Тип баннера")
+    title = models.CharField(max_length=200, verbose_name="Заголовок")
+    text = models.TextField(blank=True, null=True, verbose_name="Текст")
+    button_text = models.CharField(max_length=100, blank=True, null=True, verbose_name="Текст кнопки")
+    button_link = models.CharField(max_length=500, blank=True, null=True, verbose_name="Ссылка кнопки")
+    image = models.ImageField(
+        upload_to="banners", 
+        blank=True, 
+        null=True, 
+        verbose_name="Изображение",
+        help_text="Рекомендуемые размеры: Главный баннер - 1200x400px, Малый баннер - 400x200px. Формат: JPG, PNG"
+    )
+    background_color = models.CharField(max_length=100, default="#FF0000", verbose_name="Цвет фона")
+    status = models.CharField(choices=STATUS, max_length=50, default="Published", verbose_name="Статус")
+    order = models.PositiveIntegerField(default=0, verbose_name="Порядок сортировки")
+    date = models.DateTimeField(default=timezone.now, verbose_name="Дата создания")
+
+    class Meta:
+        ordering = ['-id']
+        verbose_name_plural = "Баннеры"
+        verbose_name = "Баннер"
+
+    def __str__(self):
+        return self.title or f"Banner {self.pk or 'New'}"

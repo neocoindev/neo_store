@@ -6,9 +6,12 @@
         <meta name="author" content="Ecommerce" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>NEO Store</title>
+        <link rel="icon" type="image/svg+xml" href="{% static 'assets/img/NEO.svg' %}" />
+        <link rel="apple-touch-icon" href="{% static 'assets/img/NEO.svg' %}" />
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 
         <link href="{% static 'assets/css/styles.css' %}" rel="stylesheet" />
+        <link href="{% static 'assets/css/responsive.css' %}" rel="stylesheet" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
         <style>
@@ -266,6 +269,173 @@
         <script src="{% static 'assets/js/custom.js' %}"></script>
         <script src="{% static 'assets/js/function.js' %}?v=2"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <!-- Адаптивный JavaScript для мобильных устройств -->
+        <script>
+            // Управление фильтрами на странице магазина
+            document.addEventListener('DOMContentLoaded', function() {
+                // Создание оверлея для фильтров
+                let filterOverlay = document.querySelector('.filter-overlay');
+                if (!filterOverlay) {
+                    filterOverlay = document.createElement('div');
+                    filterOverlay.className = 'filter-overlay';
+                    document.body.appendChild(filterOverlay);
+                }
+                
+                // Создание оверлея для сайдбаров
+                let sidebarOverlay = document.querySelector('.sidebar-overlay');
+                if (!sidebarOverlay) {
+                    sidebarOverlay = document.createElement('div');
+                    sidebarOverlay.className = 'sidebar-overlay';
+                    document.body.appendChild(sidebarOverlay);
+                }
+                
+                // Фильтры магазина
+                const filterToggleBtn = document.querySelector('.filter-toggle-btn');
+                const shopFilters = document.querySelector('.shop-filters');
+                const closeFiltersBtn = document.querySelector('.close-filters-btn');
+                
+                if (filterToggleBtn && shopFilters) {
+                    filterToggleBtn.addEventListener('click', function() {
+                        shopFilters.classList.add('show');
+                        filterOverlay.classList.add('show');
+                        if (closeFiltersBtn) closeFiltersBtn.style.display = 'block';
+                        document.body.style.overflow = 'hidden';
+                    });
+                    
+                    if (closeFiltersBtn) {
+                        closeFiltersBtn.addEventListener('click', function() {
+                            shopFilters.classList.remove('show');
+                            filterOverlay.classList.remove('show');
+                            this.style.display = 'none';
+                            document.body.style.overflow = '';
+                        });
+                    }
+                    
+                    // Закрытие при клике на оверлей
+                    filterOverlay.addEventListener('click', function() {
+                        shopFilters.classList.remove('show');
+                        this.classList.remove('show');
+                        if (closeFiltersBtn) closeFiltersBtn.style.display = 'none';
+                        document.body.style.overflow = '';
+                    });
+                }
+                
+                // Управление сайдбарами
+                const sidebarToggleBtns = document.querySelectorAll('.sidebar-toggle-btn');
+                const sidebars = document.querySelectorAll('.sidebar');
+                const closeSidebarBtns = document.querySelectorAll('.close-sidebar-btn');
+                
+                sidebarToggleBtns.forEach(function(btn, index) {
+                    btn.addEventListener('click', function() {
+                        const sidebar = this.nextElementSibling;
+                        if (sidebar && sidebar.classList.contains('sidebar')) {
+                            sidebar.classList.add('show');
+                            sidebarOverlay.classList.add('show');
+                            const closeBtn = sidebar.querySelector('.close-sidebar-btn');
+                            if (closeBtn) closeBtn.style.display = 'block';
+                            document.body.style.overflow = 'hidden';
+                        }
+                    });
+                });
+                
+                closeSidebarBtns.forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        const sidebar = this.closest('.sidebar');
+                        if (sidebar) {
+                            sidebar.classList.remove('show');
+                            sidebarOverlay.classList.remove('show');
+                            this.style.display = 'none';
+                            document.body.style.overflow = '';
+                        }
+                    });
+                });
+                
+                // Закрытие сайдбаров при клике на оверлей
+                sidebarOverlay.addEventListener('click', function() {
+                    sidebars.forEach(function(sidebar) {
+                        if (sidebar.classList.contains('show')) {
+                            sidebar.classList.remove('show');
+                            const closeBtn = sidebar.querySelector('.close-sidebar-btn');
+                            if (closeBtn) closeBtn.style.display = 'none';
+                        }
+                    });
+                    this.classList.remove('show');
+                    document.body.style.overflow = '';
+                });
+                
+                // Адаптация таблиц для мобильных
+                const tables = document.querySelectorAll('table');
+                tables.forEach(function(table) {
+                    if (window.innerWidth <= 767.98) {
+                        table.classList.add('table-mobile-card');
+                        const thead = table.querySelector('thead');
+                        if (thead) {
+                            const headers = thead.querySelectorAll('th');
+                            const tbody = table.querySelector('tbody');
+                            if (tbody) {
+                                const rows = tbody.querySelectorAll('tr');
+                                rows.forEach(function(row) {
+                                    const cells = row.querySelectorAll('td');
+                                    cells.forEach(function(cell, index) {
+                                        if (headers[index]) {
+                                            cell.setAttribute('data-label', headers[index].textContent);
+                                        }
+                                    });
+                                });
+                            }
+                        }
+                    }
+                });
+                
+                // Обработка изменения размера окна
+                let resizeTimer;
+                window.addEventListener('resize', function() {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(function() {
+                        // Закрытие всех открытых сайдбаров и фильтров при изменении размера
+                        if (window.innerWidth > 991.98) {
+                            sidebars.forEach(function(sidebar) {
+                                sidebar.classList.remove('show');
+                            });
+                            if (shopFilters) {
+                                shopFilters.classList.remove('show');
+                            }
+                            filterOverlay.classList.remove('show');
+                            sidebarOverlay.classList.remove('show');
+                            document.body.style.overflow = '';
+                        }
+                    }, 250);
+                });
+            });
+        </script>
+
+        <!-- Mobile Bottom Navigation Menu -->
+        <div class="mobile-bottom-nav">
+            <a href="{% url 'store:index' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                <i class="fas fa-home"></i>
+                <span>Главная</span>
+            </a>
+            <a href="{% url 'store:shop' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'shop' %}active{% endif %}">
+                <i class="fas fa-search"></i>
+                <span>Поиск</span>
+            </a>
+            <a href="{% url 'store:cart' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'cart' %}active{% endif %}">
+                <i class="fas fa-shopping-basket"></i>
+                <span>Корзина</span>
+                {% if total_cart_items > 0 %}
+                <span class="mobile-nav-badge">{{ total_cart_items }}</span>
+                {% endif %}
+            </a>
+            <a href="#" class="mobile-nav-item">
+                <i class="fas fa-heart"></i>
+                <span>Избранное</span>
+            </a>
+            <a href="{% url 'userauths:sign-in' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'sign-in' or request.resolver_match.url_name == 'sign-up' %}active{% endif %}">
+                <i class="fas fa-user"></i>
+                <span>Профиль</span>
+            </a>
+        </div>
 
     </body>
 </html>

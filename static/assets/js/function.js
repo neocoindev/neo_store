@@ -196,53 +196,63 @@ $(document).ready(function () {
     };
     fetchCountry();
 
-    $(document).on("change", ".search-filter, .category-filter, .rating-filter, input[name='price-filter'], input[name='items-display'], .size-filter, .colors-filter", function () {
-        let filters = {
-            categories: [],
-            rating: [],
-            colors: [],
-            sizes: [],
-            prices: "",
-            display: "",
-            searchFilter: "",
-        };
+    // Старая логика фильтрации отключена - теперь используется shop.js
+    // Оставляем только для совместимости, если shop.js не загружен
+    if (typeof window.wbShopInitialized === 'undefined') {
+        $(document).on("change", ".search-filter, .category-filter, .rating-filter, input[name='price-filter'], input[name='items-display'], .size-filter, .colors-filter", function () {
+            // Проверяем, используется ли новая система (shop.js)
+            if ($('.wb-products-grid').length > 0) {
+                return; // Используется новая система, не обрабатываем здесь
+            }
+            
+            // Старая логика для обратной совместимости
+            let filters = {
+                categories: [],
+                rating: [],
+                colors: [],
+                sizes: [],
+                prices: "",
+                display: "",
+                searchFilter: "",
+            };
 
-        $(".category-filter:checked").each(function () {
-            filters.categories.push($(this).val());
+            $(".category-filter:checked").each(function () {
+                filters.categories.push($(this).val());
+            });
+
+            $(".rating-filter:checked").each(function () {
+                filters.rating.push($(this).val());
+            });
+
+            $(".size-filter:checked").each(function () {
+                filters.sizes.push($(this).val());
+            });
+
+            $(".colors-filter:checked").each(function () {
+                filters.colors.push($(this).val());
+            });
+
+            filters.display = $("input[name='items-display']:checked").val();
+            filters.prices = $("input[name='price-filter']:checked").val();
+            filters.searchFilter = $("input[name='search-filter']").val();
+
+            console.log(filters);
+
+            $.ajax({
+                url: "/filter_products/",
+                method: "GET",
+                data: filters,
+                success: function (response) {
+                    // Replace product list with the filtered products
+                    $("#products-list").html(response.html);
+                    $(".product_count").html(response.product_count);
+                },
+                error: function (error) {
+                    console.log("Error fetching filtered products:", error);
+                },
+            });
         });
-
-        $(".rating-filter:checked").each(function () {
-            filters.rating.push($(this).val());
-        });
-
-        $(".size-filter:checked").each(function () {
-            filters.sizes.push($(this).val());
-        });
-
-        $(".colors-filter:checked").each(function () {
-            filters.colors.push($(this).val());
-        });
-
-        filters.display = $("input[name='items-display']:checked").val();
-        filters.prices = $("input[name='price-filter']:checked").val();
-        filters.searchFilter = $("input[name='search-filter']").val();
-
-        console.log(filters);
-
-        $.ajax({
-            url: "/filter_products/",
-            method: "GET",
-            data: filters,
-            success: function (response) {
-                // Replace product list with the filtered products
-                $("#products-list").html(response.html);
-                $(".product_count").html(response.product_count);
-            },
-            error: function (error) {
-                console.log("Error fetching filtered products:", error);
-            },
-        });
-    });
+    }
 
     $(document).on("click", ".reset_shop_filter_btn", function () {
         let filters = {

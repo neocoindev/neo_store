@@ -37,10 +37,14 @@ def clear_cart_items(request):
 def index(request):
     products = store_models.Product.objects.filter(status="Published")
     categories = store_models.Category.objects.all()
+    main_banners = store_models.Banner.objects.filter(banner_type="main", status="Published").order_by('order', '-date')
+    small_banners = store_models.Banner.objects.filter(banner_type="small", status="Published").order_by('order', '-date')[:3]
     
     context = {
         "products": products,
         "categories": categories,
+        "main_banners": main_banners,
+        "small_banners": small_banners,
     }
     return render(request, "store/index.html", context)
 
@@ -248,7 +252,7 @@ def delete_cart_item(request):
     cart_sub_total = store_models.Cart.objects.filter(cart_id=cart_id).aggregate(sub_total = models.Sum("sub_total"))['sub_total']
 
     return JsonResponse({
-        "message": "Item deleted",
+        "message": "Товар удален",
         "total_cart_items": total_cart_items.count(),
         "cart_sub_total": "{:,.2f}".format(cart_sub_total) if cart_sub_total else 0.00
     })
@@ -611,9 +615,21 @@ def payment_status(request, order_id):
     return render(request, "store/payment_status.html", context)
 
 def filter_products(request):
-    products = store_models.Product.objects.all()
+    """
+    Улучшенная функция фильтрации товаров с поддержкой:
+    - AJAX запросов без перезагрузки страницы
+    - Пагинации для infinite scroll
+    - Оптимизированных запросов (select_related, prefetch_related)
+    - Возврат JSON с HTML и метаданными
+    """
+    from django.core.paginator import Paginator
+    
+    # Начинаем с базового queryset только опубликованных товаров
+    # Оптимизация: используем select_related для ForeignKey и prefetch_related для обратных связей
+    # Важно: Variant связан с Product через ForeignKey, поэтому используем обратную связь variant_set
+    products = store_models.Product.objects.filter(status="Published").select_related('category', 'vendor').prefetch_related('reviews', 'variant_set__variant_items')
 
-    # Get filters from the AJAX request
+    # Получаем фильтры из AJAX запроса
     categories = request.GET.getlist('categories[]')
     rating = request.GET.getlist('rating[]')
     sizes = request.GET.getlist('sizes[]')
@@ -621,52 +637,81 @@ def filter_products(request):
     price_order = request.GET.get('prices')
     search_filter = request.GET.get('searchFilter')
     display = request.GET.get('display')
+    page = request.GET.get('page', 1)  # Для пагинации
+    per_page = int(request.GET.get('per_page', 20))  # Количество товаров на странице
 
-    print("categories =======", categories)
-    print("rating =======", rating)
-    print("sizes =======", sizes)
-    print("colors =======", colors)
-    print("price_order =======", price_order)
-    print("search_filter =======", search_filter)
-    print("display =======", display)
-
-   
-    # Apply category filtering
+    # Применяем фильтр по категориям
+    # Важно: конвертируем строки в числа, так как они приходят как строки из GET запроса
     if categories:
-        products = products.filter(category__id__in=categories)
+        try:
+            category_ids = [int(cat_id) for cat_id in categories if cat_id and str(cat_id).isdigit()]
+            if category_ids:
+                products = products.filter(category__id__in=category_ids)
+        except (ValueError, TypeError) as e:
+            print(f"Error converting category IDs: {e}")
+            # Продолжаем без фильтрации по категориям
 
-    # Apply rating filtering
+    # Применяем фильтр по рейтингу
     if rating:
-        products = products.filter(reviews__rating__in=rating).distinct()
+        # Конвертируем строки в числа для фильтрации
+        rating_values = [int(r) for r in rating if r.isdigit()]
+        if rating_values:
+            products = products.filter(reviews__rating__in=rating_values).distinct()
 
-    
-
-    # Apply size filtering
+    # Применяем фильтр по размерам
+    # Используем обратную связь variant_set вместо variant
     if sizes:
-        products = products.filter(variant__variant_items__content__in=sizes).distinct()
+        products = products.filter(variant_set__variant_items__content__in=sizes).distinct()
 
-    # Apply color filtering
+    # Применяем фильтр по цветам
+    # Используем обратную связь variant_set вместо variant
     if colors:
-        products = products.filter(variant__variant_items__content__in=colors).distinct()
+        products = products.filter(variant_set__variant_items__content__in=colors).distinct()
 
-    # Apply price ordering
+    # Применяем поисковый фильтр
+    if search_filter:
+        products = products.filter(name__icontains=search_filter)
+
+    # Применяем сортировку по цене
     if price_order == 'lowest':
         products = products.order_by('-price')
     elif price_order == 'highest':
         products = products.order_by('price')
+    else:
+        # Сортировка по умолчанию (новые сначала)
+        products = products.order_by('-date', '-id')
 
-    # Apply search filter
-    if search_filter:
-        products = products.filter(name__icontains=search_filter)
+    # Получаем общее количество товаров ДО пагинации (для отображения)
+    total_count = products.count()
 
-    if display:
-        products = products.filter()[:int(display)]
+    # Применяем пагинацию
+    paginator = Paginator(products, per_page)
+    try:
+        page_obj = paginator.page(page)
+        products_page = page_obj.object_list
+    except:
+        page_obj = paginator.page(1)
+        products_page = page_obj.object_list
 
+    # Ограничение количества товаров (если указано в display)
+    if display and display.isdigit():
+        display_count = int(display)
+        if display_count < total_count:
+            products_page = products_page[:display_count]
 
-    # Render the filtered products as HTML using render_to_string
-    html = render_to_string('partials/_store.html', {'products': products})
+    # Рендерим отфильтрованные товары в HTML
+    html = render_to_string('partials/_store.html', {'products': products_page})
 
-    return JsonResponse({'html': html, 'product_count': products.count()})
+    # Возвращаем JSON с HTML, метаданными и информацией о пагинации
+    return JsonResponse({
+        'html': html,
+        'product_count': total_count,
+        'page': page_obj.number,
+        'has_next': page_obj.has_next(),
+        'has_previous': page_obj.has_previous(),
+        'num_pages': paginator.num_pages,
+        'per_page': per_page
+    })
 
 def order_tracker_page(request):
     if request.method == "POST":

@@ -1,5 +1,8 @@
 <div class="col-12 col-md-12 col-lg-4 col-xl-4 miliods">
-    <div class="d-block border p-2 rounded">
+    <button class="btn bg-primary text-white rounded sidebar-toggle-btn mb-3" type="button">
+        <i class="fas fa-bars me-2"></i>Меню
+    </button>
+    <div class="sidebar d-block border p-2 rounded">
         <div class="dashboard_author px-2 py-5">
             <div class="dash_auth_thumb circle p-1 border d-inline-flex mx-auto mb-2">
                 <img src="{{request.user.profile.image.url}}" class="img-fluid circle" style="width: 100px; height: 100px; object-fit: cover;" alt="" />
@@ -33,5 +36,8 @@
                 </li>
             </ul>
         </div>
+        <button class="btn bg-secondary btn-sm rounded w-100 mt-3 close-sidebar-btn" type="button" style="display: none;">
+            <i class="fas fa-times me-2"></i>Закрыть
+        </button>
     </div>
 </div>

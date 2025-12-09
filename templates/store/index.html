@@ -1,360 +1,937 @@
-{% extends 'partials/base.html' %} {% load static %} {% load humanize %} {% load currency_tags %} {% block content %}
-    <!-- <section class="p-0 pb-5 mb-5">
-        <div class="container">
+{% extends 'partials/base.html' %} 
+{% load static %} 
+{% load humanize %} 
+{% load currency_tags %} 
 
-            <div class="row d-flex justify-content-center align-items-center">
-                <div class="col-12 col-lg-7 p-4 rounded-3 bg-white">
-                    <p class="text-secondary fs-4 mb-0 mt-5 mb-3">20% скидка только сегодня! <img
-                            src="https://cdn-icons-png.flaticon.com/128/9004/9004955.png" width="30" alt=""></p>
-                    <h1 class="display-4 fw-bold">Лучшие товары. <span class="text-success"> <br> Лучшие цены. <br><span
-                            class="text-dark">Быстрая доставка</span></span></h1>
-                    <p class="text-secondary fs-6 mt-4">Безопасность во всём.<br>
-                        Поддержка 24/7.<br>
-                        Реферальная программа.<br>
-                        Поддержка популярных фиатных валют ($, €, ¥) и криптовалют (NEO, USDT, SOL)</p>
-                    <form method="GET" action="{% url 'store:shop' %}" class="d-flex align-items-center gap-2 mt-5">
-                        <div class="d-flex align-items-center border  rounded-3 bg-light  w-75">
-                            <input type="text" class="form-control shadow-none border-0 bg-transparent"
-                                   placeholder="Поиск товара" name="q" id="search-input" required/>
-                        </div>
-                        <button type="submit" class="btn bg-primary  text-white rounded "> <i
-                                class="fas fa-search text-white"></i></button>
-                    </form>
-                    <div class="d-flex justify-content-start gap-4 align-items-center mt-3">
-                        <p class="text-secondary">Бесплатная доставка только сегодня! Применяются <b>Условия
-                            использования</b></p>
-                    </div>
-                    <div class="d-flex align-items-center justify-content-start gap-5 fs-5 text-secondary mt-2">
-                        <i class="fab text-success fa-telegram"></i>
-                        <i class="fab fa-whatsapp"></i>
-                        <i class="fab text-success fa-instagram"></i>
-                        <i class="fab text-success fa-facebook"></i>
-                    </div>
-                </div>
-                <div class="col-12 col-lg-5">
-                    <img class="img-fluid rounded-3 w-100" style="height: 500px; width: 100%; object-fit: contain"
-                         src="{% static 'assets/img/home-hero.jpg' %}" alt=""/>
-                </div>
-            </div>
+{% block content %}
+
+<style>
+    /* ============================================
+       WILDBERRIES-STYLE HOMEPAGE DESIGN
+       ============================================ */
+    
+    /* Wide container for header on desktop */
+    @media (min-width: 1400px) {
+        .header .container {
+            max-width: 1640px;
+            padding-left: 40px;
+            padding-right: 40px;
+        }
+    }
+    
+    @media (min-width: 1200px) and (max-width: 1399.98px) {
+        .header .container {
+            max-width: 1200px;
+            padding-left: 30px;
+            padding-right: 30px;
+        }
+    }
+    
+    .wb-homepage {
+        background: #f8f8f8;
+        min-height: 100vh;
+        padding-bottom: 40px;
+    }
+    
+    /* ========== SEARCH SECTION ========== */
+    .wb-search-section {
+        background: #fff;
+        padding: 20px 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        margin-bottom: 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+    
+    .wb-search-container {
+        max-width: 1640px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+    
+    .wb-search-form {
+        display: flex;
+        max-width: 1000px;
+        margin: 0 auto;
+        gap: 0;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    
+    .wb-search-input {
+        flex: 1;
+        padding: 14px 24px;
+        border: none;
+        font-size: 16px;
+        background: #fff;
+        color: #333;
+    }
+    
+    .wb-search-input::placeholder {
+        color: #999;
+    }
+    
+    .wb-search-input:focus {
+        outline: none;
+    }
+    
+    .wb-search-btn {
+        padding: 14px 32px;
+        background: #FF0000;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 16px;
+        transition: background 0.3s;
+        white-space: nowrap;
+    }
+    
+    .wb-search-btn:hover {
+        background: #cc0000;
+    }
+    
+    /* ========== CATEGORIES SECTION ========== */
+    .wb-categories-section {
+        background: #fff;
+        padding: 25px 0;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .wb-categories-container {
+        max-width: 1640px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+    
+    .wb-section-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #333;
+        padding: 0;
+    }
+    
+    .wb-categories-scroll {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+        padding: 10px 0 20px;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    
+    .wb-categories-scroll::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .wb-categories-scroll::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    
+    .wb-categories-scroll::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 3px;
+    }
+    
+    .wb-category-item {
+        min-width: 110px;
+        text-align: center;
+        text-decoration: none;
+        color: #333;
+        transition: transform 0.2s;
+        flex-shrink: 0;
+    }
+    
+    .wb-category-item:hover {
+        transform: translateY(-3px);
+        color: #FF0000;
+        text-decoration: none;
+    }
+    
+    .wb-category-icon {
+        width: 90px;
+        height: 90px;
+        border-radius: 16px;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 12px;
+        overflow: hidden;
+        transition: box-shadow 0.3s;
+    }
+    
+    .wb-category-item:hover .wb-category-icon {
+        box-shadow: 0 4px 12px rgba(255,0,0,0.15);
+    }
+    
+    .wb-category-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .wb-category-icon i {
+        font-size: 40px;
+        color: #999;
+    }
+    
+    .wb-category-name {
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.4;
+        color: #333;
+    }
+    
+    .wb-category-item:hover .wb-category-name {
+        color: #FF0000;
+    }
+    
+    /* ========== BANNERS SECTION ========== */
+    .wb-banners-section {
+        max-width: 1640px;
+        margin: 0 auto 25px;
+        padding: 0 20px;
+    }
+    
+    .wb-banner-main {
+        background: linear-gradient(135deg, #FF0000 0%, #ff6b35 100%);
+        border-radius: 16px;
+        padding: 50px 40px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 20px;
+        min-height: 280px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .wb-banner-main[style*="background-image"] {
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+    }
+    
+    .wb-banner-main[style*="background-image"]::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1;
+    }
+    
+    .wb-banner-main[style*="background-image"] > * {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .wb-banner-title {
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        line-height: 1.2;
+    }
+    
+    .wb-banner-text {
+        font-size: 18px;
+        margin-bottom: 25px;
+        opacity: 0.95;
+        line-height: 1.5;
+    }
+    
+    .wb-banner-btn {
+        display: inline-block;
+        padding: 14px 32px;
+        background: white;
+        color: #FF0000;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 16px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        max-width: fit-content;
+    }
+    
+    .wb-banner-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        color: #FF0000;
+        text-decoration: none;
+    }
+    
+    .wb-banner-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+    
+    .wb-banner-small {
+        background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+        border-radius: 12px;
+        padding: 30px 25px;
+        color: white;
+        min-height: 180px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .wb-banner-small[style*="background-image"] {
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+    }
+    
+    .wb-banner-small[style*="background-image"]::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 1;
+    }
+    
+    .wb-banner-small[style*="background-image"] > * {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .wb-banner-small h3 {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .wb-banner-small p {
+        font-size: 14px;
+        opacity: 0.95;
+        margin: 0;
+    }
+    
+    /* ========== PRODUCTS SECTION ========== */
+    .wb-products-section {
+        background: #fff;
+        padding: 30px 0;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .wb-products-container {
+        max-width: 1640px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+    
+    .wb-products-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .wb-view-all-link {
+        color: #FF0000;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: gap 0.2s;
+    }
+    
+    .wb-view-all-link:hover {
+        gap: 12px;
+        color: #cc0000;
+        text-decoration: none;
+    }
+    
+    /* Desktop: 6 columns grid */
+    .wb-products-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 20px;
+    }
+    
+    /* Product Card */
+    .wb-product-card {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+    
+    .wb-product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .wb-product-image-wrapper {
+        position: relative;
+        width: 100%;
+        padding-top: 100%;
+        background: #f8f8f8;
+        overflow: hidden;
+    }
+    
+    .wb-product-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+    
+    .wb-product-card:hover .wb-product-image {
+        transform: scale(1.05);
+    }
+    
+    .wb-product-info {
+        padding: 15px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .wb-product-category {
+        font-size: 11px;
+        color: #999;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        font-weight: 500;
+    }
+    
+    .wb-product-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 10px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 40px;
+    }
+    
+    .wb-product-rating {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+    
+    .wb-product-stars {
+        color: #ffc107;
+        font-size: 13px;
+        letter-spacing: 1px;
+    }
+    
+    .wb-product-price {
+        font-size: 20px;
+        font-weight: 700;
+        color: #FF0000;
+        margin-bottom: 12px;
+        margin-top: auto;
+    }
+    
+    .wb-product-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: auto;
+    }
+    
+    .wb-add-to-cart-btn {
+        flex: 1;
+        padding: 10px 16px;
+        background: #FF0000;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+        white-space: nowrap;
+    }
+    
+    .wb-add-to-cart-btn:hover {
+        background: #cc0000;
+    }
+    
+    .wb-wishlist-btn {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: white;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        flex-shrink: 0;
+    }
+    
+    .wb-wishlist-btn:hover {
+        border-color: #FF0000;
+        color: #FF0000;
+        text-decoration: none;
+    }
+    
+    .wb-wishlist-btn.active {
+        background: #FF0000;
+        border-color: #FF0000;
+        color: white;
+    }
+    
+    /* ========== DESKTOP WIDE CONTAINER ========== */
+    @media (min-width: 1400px) {
+        .wb-search-container,
+        .wb-categories-container,
+        .wb-banners-section,
+        .wb-products-container {
+            max-width: 1640px;
+            padding: 0 40px;
+        }
+        
+        .wb-search-form {
+            max-width: 1100px;
+        }
+    }
+    
+    @media (min-width: 1200px) and (max-width: 1399.98px) {
+        .wb-search-container,
+        .wb-categories-container,
+        .wb-banners-section,
+        .wb-products-container {
+            max-width: 1200px;
+            padding: 0 30px;
+        }
+    }
+    
+    /* ========== MOBILE STYLES ========== */
+    @media (max-width: 991.98px) {
+        .wb-search-section {
+            padding: 15px 0;
+        }
+        
+        .wb-search-container {
+            padding: 0 15px;
+        }
+        
+        .wb-search-form {
+            border-radius: 10px;
+        }
+        
+        .wb-search-input {
+            padding: 12px 18px;
+            font-size: 15px;
+        }
+        
+        .wb-search-btn {
+            padding: 12px 24px;
+            font-size: 14px;
+        }
+        
+        .wb-categories-container {
+            padding: 0 15px;
+        }
+        
+        .wb-section-title {
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+        
+        .wb-category-item {
+            min-width: 90px;
+        }
+        
+        .wb-category-icon {
+            width: 75px;
+            height: 75px;
+        }
+        
+        .wb-category-icon i {
+            font-size: 32px;
+        }
+        
+        .wb-category-name {
+            font-size: 12px;
+        }
+        
+        .wb-banners-section {
+            padding: 0 15px;
+        }
+        
+        .wb-banner-main {
+            padding: 35px 25px;
+            min-height: 220px;
+        }
+        
+        .wb-banner-title {
+            font-size: 26px;
+        }
+        
+        .wb-banner-text {
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .wb-banner-btn {
+            padding: 12px 24px;
+            font-size: 14px;
+        }
+        
+        .wb-banner-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        .wb-banner-small {
+            min-height: 140px;
+            padding: 20px;
+        }
+        
+        .wb-banner-small h3 {
+            font-size: 18px;
+        }
+        
+        .wb-banner-small p {
+            font-size: 13px;
+        }
+        
+        .wb-products-container {
+            padding: 0 15px;
+        }
+        
+        .wb-products-header {
+            margin-bottom: 20px;
+        }
+        
+        /* Mobile: 2 columns grid */
+        .wb-products-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .wb-product-info {
+            padding: 12px;
+        }
+        
+        .wb-product-name {
+            font-size: 13px;
+            min-height: 36px;
+        }
+        
+        .wb-product-price {
+            font-size: 18px;
+        }
+        
+        .wb-add-to-cart-btn {
+            padding: 9px 12px;
+            font-size: 12px;
+        }
+        
+        .wb-wishlist-btn {
+            width: 38px;
+            height: 38px;
+        }
+    }
+    
+    @media (max-width: 575.98px) {
+        .wb-search-input {
+            padding: 11px 15px;
+            font-size: 14px;
+        }
+        
+        .wb-search-btn {
+            padding: 11px 20px;
+            font-size: 13px;
+        }
+        
+        .wb-section-title {
+            font-size: 20px;
+        }
+        
+        .wb-category-item {
+            min-width: 80px;
+        }
+        
+        .wb-category-icon {
+            width: 65px;
+            height: 65px;
+        }
+        
+        .wb-category-icon i {
+            font-size: 28px;
+        }
+        
+        .wb-category-name {
+            font-size: 11px;
+        }
+        
+        .wb-banner-main {
+            padding: 30px 20px;
+            min-height: 200px;
+        }
+        
+        .wb-banner-title {
+            font-size: 22px;
+        }
+        
+        .wb-banner-text {
+            font-size: 14px;
+        }
+        
+        .wb-products-grid {
+            gap: 10px;
+        }
+        
+        .wb-product-info {
+            padding: 10px;
+        }
+        
+        .wb-product-name {
+            font-size: 12px;
+            min-height: 32px;
+        }
+        
+        .wb-product-price {
+            font-size: 16px;
+        }
+        
+        .wb-add-to-cart-btn {
+            padding: 8px 10px;
+            font-size: 11px;
+        }
+        
+        .wb-wishlist-btn {
+            width: 36px;
+            height: 36px;
+        }
+    }
+    
+    /* Tablet adjustments */
+    @media (min-width: 768px) and (max-width: 991.98px) {
+        .wb-products-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+    }
+    
+    @media (min-width: 992px) and (max-width: 1199.98px) {
+        .wb-products-grid {
+            grid-template-columns: repeat(5, 1fr);
+            gap: 18px;
+        }
+    }
+</style>
+
+<div class="wb-homepage">
+    <!-- Search Section - Sticky Top -->
+    <div class="wb-search-section">
+        <div class="wb-search-container">
+            <form method="GET" action="{% url 'store:shop' %}" class="wb-search-form">
+                <input 
+                    type="text" 
+                    class="wb-search-input" 
+                    placeholder="Поиск товаров..." 
+                    name="q" 
+                    id="search-input"
+                    value="{{ request.GET.q }}"
+                />
+                <button type="submit" class="wb-search-btn">
+                    <i class="fas fa-search"></i> Найти
+                </button>
+            </form>
         </div>
-    </section> -->
+    </div>
 
-    <!-- Promotional Banner Section -->
-    <!-- <section class="promo-banner-section mt-5 mb-5">
-        Top Horizontal Strip - Full Width -->
-        <!-- <div class="promo-top-strip-wrapper">
-            <div class="container-fluid px-4">
-                <div class="promo-top-strip p-4 text-white d-flex justify-content-between align-items-center flex-wrap">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="promo-icons">
-                            <i class="fas fa-box fs-2 me-2"></i>
-                            <i class="fas fa-sunglasses fs-2"></i>
-                        </div>
-                        <div>
-                            <p class="mb-0 fw-bold fs-5">Товары с местного склада Кыргызстана</p>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="promo-bubble bg-white text-dark rounded-pill px-4 py-2">
-                            <p class="mb-0 fw-bold">Быстрее и выгоднее</p>
-                        </div>
-                        <i class="fas fa-shoe-prints fs-2"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Three Column Banner - Full Width with Container -->
-        <!-- <div class="container-fluid px-4 mt-4">
-            <div class="row g-4">
-                <!-- Left Card - Fashion/Style -->
-                <!-- <div class="col-lg-4 col-md-6">
-                    <div class="promo-card promo-card-green rounded-4 p-4 position-relative overflow-hidden h-100">
-                        <div class="promo-pattern"></div>
-                        <h3 class="text-dark fw-bold mb-3">Стильные вещи</h3>
-                        <div class="promo-product-image position-absolute bottom-0 end-0">
-                            <i class="fas fa-tshirt" style="font-size: 120px; opacity: 0.3; color: #4caf50;"></i>
-                        </div>
-                        <a href="{% url 'store:shop' %}?category=women" class="btn btn-light mt-3 rounded-pill">
-                            Смотреть коллекцию <i class="fas fa-arrow-right ms-2"></i>
-                        </a>
-                    </div>
-                </div> --> -->
-
-                <!-- Middle Card - New Year Sale -->
-                <!-- <div class="col-lg-4 col-md-6">
-                    <div class="promo-card promo-card-dark rounded-4 p-4 position-relative overflow-hidden h-100">
-                        <div class="promo-scene position-absolute end-0 bottom-0" style="opacity: 0.2;">
-                            <i class="fas fa-tree" style="font-size: 150px; color: #1cee5b;"></i>
-                        </div>
-                        <h2 class="text-white fw-bold mb-2">НОВОГОДНИЙ</h2>
-                        <h2 class="text-white fw-bold mb-3">декор со скидками</h2>
-                        <div class="promo-discount mb-3">
-                            <span class="text-white" style="font-size: 3rem; font-weight: 900;">до 90%</span>
-                        </div>
-                        <p class="text-white-50 small mb-3">С 19.11.2024 ПО 31.12.2025</p>
-                        <a href="{% url 'store:shop' %}?q=новогодний" class="btn bg-primary text-white rounded-pill">
-                            Купить сейчас <i class="fas fa-shopping-cart ms-2"></i>
-                        </a>
-                    </div>
-                </div> -->
-
-                <!-- Right Card - New Year Look -->
-                <!-- <div class="col-lg-4 col-md-6">
-                    <div class="promo-card promo-card-purple rounded-4 p-4 position-relative overflow-hidden h-100">
-                        <div class="promo-circles"></div>
-                        <div class="promo-product-image position-absolute bottom-0 start-0">
-                            <i class="fas fa-tshirt" style="font-size: 140px; opacity: 0.3; color: #1cee5b; transform: rotate(-15deg);"></i>
-                        </div>
-                        <h3 class="text-white fw-bold mb-3 position-relative" style="z-index: 2;">НОВОГОДНИЙ</h3>
-                        <h3 class="text-white fw-bold mb-4 position-relative" style="z-index: 2;">образ</h3>
-                        <a href="{% url 'store:shop' %}?category=women" class="btn btn-light mt-3 rounded-pill position-relative" style="z-index: 2;">
-                            Выбрать наряд <i class="fas fa-arrow-right ms-2"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div> -->
-    <!-- </section> --> -->
-
-    <style>
-        /* Promotional Banner Styles */
-        .promo-banner-section {
-            padding: 0;
-            margin: 2rem 0;
-        }
-
-        /* Top Strip - Full Width */
-        .promo-top-strip-wrapper {
-            width: 100%;
-            background: linear-gradient(135deg, #FF0000 0%, #ff6b35 100%);
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
-        }
-
-        .promo-top-strip {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .promo-bubble {
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Promo Cards */
-        .promo-card {
-            min-height: 350px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .promo-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Left Card - Green */
-        .promo-card-green {
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-            background-image: 
-                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(76, 175, 80, 0.05) 10px, rgba(76, 175, 80, 0.05) 20px);
-        }
-
-        /* Middle Card - Dark with New Year Theme */
-        .promo-card-dark {
-            background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2d2d2d 100%);
-            color: white;
-        }
-
-        .promo-discount {
-            background: linear-gradient(135deg, #FF0000 0%, #ff6b35 100%);
-            display: inline-block;
-            padding: 0.5rem 1.5rem;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
-        }
-
-        /* Right Card - Purple Gradient */
-        .promo-card-purple {
-            background: linear-gradient(135deg, #9c27b0 0%, #673ab7 50%, #3f51b5 100%);
-            color: white;
-        }
-
-        .promo-circles::before,
-        .promo-circles::after {
-            content: '';
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .promo-circles::before {
-            width: 100px;
-            height: 100px;
-            top: 20px;
-            right: 20px;
-        }
-
-        .promo-circles::after {
-            width: 60px;
-            height: 60px;
-            top: 60px;
-            right: 60px;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .promo-card {
-                min-height: 280px;
-            }
-            
-            .promo-top-strip {
-                text-align: center;
-            }
-            
-            .promo-top-strip > div {
-                width: 100%;
-                justify-content: center !important;
-                margin-bottom: 1rem;
-            }
-
-            .container-fluid.px-4 {
-                padding-left: 1rem !important;
-                padding-right: 1rem !important;
-            }
-        }
-    </style>
-
-    {% comment %}
-    <section class="middle mt-5">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                    <div class="sec_title position-relative text-center">
-                        <h1 class="ft-bold pt-3">Популярные категории <img
-                                src="https://cdn-icons-png.flaticon.com/128/7183/7183999.png" width="40" alt=""></h1>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row align-items-center justify-content-center">
-
+    <!-- Categories Carousel -->
+    {% if categories %}
+    <div class="wb-categories-section">
+        <div class="wb-categories-container">
+            <h2 class="wb-section-title">Категории</h2>
+            <div class="wb-categories-scroll">
                 {% for c in categories %}
-                    <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-4">
-                        <div class="cats_side_wrap text-center mx-auto mb-3">
-                            <div class="sl_cat_01">
-                                <div class="d-inline-flex align-items-center justify-content-center p-4 circle mb-2 border">
-                                    <a href="{% url 'store:category' c.id %}" class="d-block">
-
-                                        {% if c.image %}
-                                            <img src="{{ c.image.url }}" class="img-fluid" width="80" alt=""/>
-                                        {% else %}
-                                            <img src="{% static 'assets/img/headphones.png' %}" class="img-fluid"
-                                                 width="40" alt=""/>
-                                        {% endif %}
-
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="sl_cat_02">
-                                <h6 class="m-0 ft-medium fs-sm"><a
-                                        href="{% url 'store:category' c.id %}">{{ c.title }}</a></h6>
-                            </div>
-                        </div>
+                <a href="{% url 'store:category' c.id %}" class="wb-category-item">
+                    <div class="wb-category-icon">
+                        {% if c.image %}
+                            <img src="{{ c.image.url }}" alt="{{ c.title }}" />
+                        {% else %}
+                            <i class="fas fa-box"></i>
+                        {% endif %}
                     </div>
-                {% endfor %}
-
-
-            </div>
-        </div>
-    </section>
-    {% endcomment %}
-
-    <section class="middle mt-5">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                    <div class="sec_title position-relative text-center">
-                        <h1 class="ft-bold pt-3">Популярные товары <img
-                                src="https://cdn-icons-png.flaticon.com/128/785/785116.png" width="40" alt=""></h1>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row align-items-center rows-products">
-                {% for p in products %}
-                    <div class="col-lg-3 mb-3">
-                        <div class="product_grid card b-0  rounded-3 shadow m-2 p-2">
-                            <div class="card-body p-0">
-                                <div class="shop_thumb position-relative">
-                                    <a class="card-img-top d-block overflow-hidden"
-                                       href="{% url 'store:product_detail' p.slug %}"><img class="card-img-top"
-                                                                                           style="width: 100%; height: 230px; object-fit: cover;"
-                                                                                           src="{% if p.image %}{{ p.image.url }}{% else %}/static/images/default-product.jpg{% endif %}"
-                                                                                           alt="..."/></a>
-                                </div>
-                            </div>
-                            <div class="card-footer b-0 p-0 pt-2 bg-white d-flex align-items-start justify-content-between">
-                                <div class="text-left">
-                                    <div class="text-left">
-                                        <div class="elso_titl"><span class="small"><a
-                                                href="{% url 'store:category' p.category.id %}">{{ p.category.title }}</a></span>
-                                        </div>
-                                        <h5 class="fs-md mb-0 lh-1 mb-1"><a
-                                                href="{% url 'store:product_detail' p.slug %}">{{ p.name }}</a></h5>
-                                        <div class="star-rating align-items-center d-flex justify-content-left mb-2 p-0 mt-3">
-                                            {% if not p.average_rating %}
-                                                <i class="fas fa-star text-warning"></i>
-                                            {% elif p.average_rating > 0 and p.average_rating < 2 %}
-                                                <i class="fas fa-star text-warning"></i>
-                                            {% elif p.average_rating > 1 and p.average_rating < 3 %}
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                            {% elif p.average_rating > 2 and p.average_rating < 4 %}
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                            {% elif p.average_rating > 3 and p.average_rating < 5 %}
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                            {% elif p.average_rating > 4 %}
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                                <i class="fas fa-star text-warning"></i>
-                                            {% endif %}
-                                        </div>
-                                        {% load currency_tags %}
-                                        <div class="elis_rty"><span
-                                                class="ft-bold text-dark fs-sm">{% format_currency p.price %}</span></div>
-                                    </div>
-                                    <div class="d-flex align-items-center gap-3">
-                                        <button type="button"
-                                                class="btn btn-sm bg-primary text-white rounded add_to_cart"
-                                                data-id="{{ p.id }}">В корзину <i class="fas fa-shopping-cart ms-2"></i>
-                                        </button>
-                                        <input type="hidden" class="quantity" value="1" name="" id="">
-                                        <a href="#" class="add_to_wishlist" data-product_id="{{ p.id }}"><i
-                                                class="fas fa-heart fs-4 text-black"></i></a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="wb-category-name">{{ c.title }}</div>
+                </a>
                 {% endfor %}
             </div>
+        </div>
+    </div>
+    {% endif %}
 
-            <div class="row justify-content-center">
-                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                    <div class="position-relative text-center">
-                        <a href="{% url 'store:shop' %}" class="btn bg-dark text-light rounded btn-sm mt-5">Перейти в
-                            магазин <i class="fas fa-arrow-right ms-2"></i></a>
+    <!-- Main Promo Banner -->
+    <div class="wb-banners-section">
+        {% if main_banners %}
+            {% for banner in main_banners|slice:":1" %}
+            <div class="wb-banner-main" {% if banner.image %}style="background-image: url('{{ banner.image.url }}'); background-size: cover; background-position: center;"{% else %}style="background: {{ banner.background_color }};"{% endif %}>
+                <h2 class="wb-banner-title">{{ banner.title }}</h2>
+                {% if banner.text %}
+                <p class="wb-banner-text">{{ banner.text }}</p>
+                {% endif %}
+                {% if banner.button_text and banner.button_link %}
+                <a href="{% if banner.button_link|slice:':4' == 'http' or banner.button_link|slice:':1' == '/' %}{{ banner.button_link }}{% else %}/{{ banner.button_link }}/{% endif %}" class="wb-banner-btn">{{ banner.button_text }}</a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <!-- Fallback banner if no banners in admin -->
+            <div class="wb-banner-main">
+                <h2 class="wb-banner-title">Лучшие предложения недели</h2>
+                <p class="wb-banner-text">Скидки до 50% на популярные товары. Ограниченное предложение!</p>
+                <a href="{% url 'store:shop' %}" class="wb-banner-btn">Смотреть все товары</a>
+            </div>
+        {% endif %}
+        
+        <div class="wb-banner-grid">
+            {% if small_banners %}
+                {% for banner in small_banners %}
+                <div class="wb-banner-small" {% if banner.image %}style="background-image: url('{{ banner.image.url }}'); background-size: cover; background-position: center;"{% else %}style="background: {{ banner.background_color }};"{% endif %}>
+                    <h3>{{ banner.title }}</h3>
+                    {% if banner.text %}
+                    <p>{{ banner.text }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- Fallback small banners if no banners in admin -->
+                <div class="wb-banner-small">
+                    <h3>Быстрая доставка</h3>
+                    <p>Доставка по всему Кыргызстану</p>
+                </div>
+                <div class="wb-banner-small" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h3>Гарантия качества</h3>
+                    <p>Официальная гарантия на все товары</p>
+                </div>
+                <div class="wb-banner-small" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <h3>Бонусы</h3>
+                    <p>Кэшбэк и специальные предложения</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Popular Products Section -->
+    {% if products %}
+    <div class="wb-products-section">
+        <div class="wb-products-container">
+            <div class="wb-products-header">
+                <h2 class="wb-section-title">Популярные товары</h2>
+                <a href="{% url 'store:shop' %}" class="wb-view-all-link">
+                    Все товары <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <!-- Products Grid: 6 columns desktop, 2 columns mobile -->
+            <div class="wb-products-grid">
+                {% for p in products|slice:":12" %}
+                <div class="wb-product-card">
+                    <a href="{% url 'store:product_detail' p.slug %}" style="text-decoration: none; color: inherit;">
+                        <div class="wb-product-image-wrapper">
+                            <img 
+                                src="{% if p.image %}{{ p.image.url }}{% else %}{% static 'images/default-product.jpg' %}{% endif %}" 
+                                alt="{{ p.name }}" 
+                                class="wb-product-image"
+                            />
+                        </div>
+                        <div class="wb-product-info">
+                            <div class="wb-product-category">{{ p.category.title }}</div>
+                            <div class="wb-product-name">{{ p.name }}</div>
+                            
+                            <div class="wb-product-rating">
+                                <div class="wb-product-stars">
+                                    {% if p.average_rating > 0 and p.average_rating < 2 %}
+                                        ★☆☆☆☆
+                                    {% elif p.average_rating > 1 and p.average_rating < 3 %}
+                                        ★★☆☆☆
+                                    {% elif p.average_rating > 2 and p.average_rating < 4 %}
+                                        ★★★☆☆
+                                    {% elif p.average_rating > 3 and p.average_rating < 5 %}
+                                        ★★★★☆
+                                    {% elif p.average_rating > 4 %}
+                                        ★★★★★
+                                    {% else %}
+                                        ★☆☆☆☆
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="wb-product-price">{% format_currency p.price %}</div>
+                        </div>
+                    </a>
+                    <div class="wb-product-actions">
+                        <button 
+                            type="button" 
+                            class="wb-add-to-cart-btn add_to_cart" 
+                            data-id="{{ p.id }}"
+                        >
+                            В корзину
+                        </button>
+                        <input type="hidden" class="quantity" value="1" />
+                        <a 
+                            href="#" 
+                            class="wb-wishlist-btn add_to_wishlist" 
+                            data-product_id="{{ p.id }}"
+                        >
+                            <i class="fas fa-heart"></i>
+                        </a>
                     </div>
                 </div>
+                {% endfor %}
             </div>
         </div>
-    </section>
+    </div>
+    {% endif %}
+
+    <!-- Additional Promo Section -->
+    <div class="wb-banners-section">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 45px 40px; color: white; text-align: center;">
+            <h2 style="font-size: 32px; font-weight: 700; margin-bottom: 15px;">Новые поступления</h2>
+            <p style="font-size: 17px; margin-bottom: 28px; opacity: 0.95;">Следите за новинками и получайте эксклюзивные предложения</p>
+            <a href="{% url 'store:shop' %}" class="wb-banner-btn" style="margin: 0 auto;">Перейти в магазин</a>
+        </div>
+    </div>
+</div>
 
 {% endblock content %}

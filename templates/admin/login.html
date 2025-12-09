@@ -1,0 +1,216 @@
+{% extends "admin/login.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/custom_admin.css' %}">
+<style>
+    /* NEO Store Branded Login Page */
+    body.login {
+        background: linear-gradient(135deg, #f8f8f8 0%, #ffffff 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    #header {
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        padding: 25px 0;
+        margin-bottom: 0;
+        border-bottom: 3px solid #FF0000;
+        position: relative;
+    }
+    
+    #header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: #FF0000;
+    }
+    
+    #header h1 {
+        margin: 0;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+    
+    #header h1 a {
+        color: #FF0000 !important;
+        font-size: 32px;
+        font-weight: 700;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+    
+    #header h1 a:hover {
+        color: #cc0000 !important;
+    }
+    
+    #header h1 img {
+        max-height: 70px;
+        width: auto;
+        height: auto;
+        display: block;
+    }
+    
+    #content {
+        max-width: 480px;
+        margin: 40px auto;
+        background: white;
+        padding: 50px 40px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        border-top: 4px solid #FF0000;
+    }
+    
+    #content h1 {
+        color: #1a1a1a;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+    
+    #content p {
+        color: #666;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 14px;
+    }
+    
+    .form-row {
+        margin-bottom: 20px;
+    }
+    
+    .form-row label {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 14px;
+    }
+    
+    .form-row input[type="text"],
+    .form-row input[type="password"] {
+        width: 100%;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 14px 18px;
+        font-size: 16px;
+        transition: all 0.3s;
+        box-sizing: border-box;
+    }
+    
+    .form-row input[type="text"]:focus,
+    .form-row input[type="password"]:focus {
+        border-color: #FF0000 !important;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+    }
+    
+    .submit-row {
+        margin-top: 30px;
+        padding: 0;
+        text-align: center;
+    }
+    
+    .submit-row input {
+        background: #FF0000 !important;
+        border: none !important;
+        border-radius: 8px;
+        padding: 14px 40px;
+        font-size: 16px;
+        font-weight: 600;
+        width: 100%;
+        color: white !important;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    .submit-row input:hover {
+        background: #cc0000 !important;
+    }
+    
+    .errornote {
+        background: #fff3f3;
+        border-left: 4px solid #FF0000;
+        padding: 12px 15px;
+        margin: 15px 0;
+        border-radius: 4px;
+        color: #FF0000;
+        font-weight: 500;
+    }
+    
+    .login-brand {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-top: 20px;
+    }
+    
+    .login-brand img {
+        max-height: 120px;
+        width: auto;
+        margin-bottom: 20px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .login-brand h2 {
+        color: #FF0000;
+        font-size: 32px;
+        font-weight: 700;
+        margin: 10px 0 8px 0;
+    }
+    
+    .login-brand p {
+        color: #666;
+        font-size: 14px;
+        margin: 0;
+    }
+    
+    .login-help {
+        text-align: center;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .login-help a {
+        color: #FF0000;
+        text-decoration: none;
+        font-size: 14px;
+    }
+    
+    .login-help a:hover {
+        color: #cc0000;
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block branding %}
+<div class="login-brand">
+    <img src="{% static 'assets/img/NEO-white.svg' %}" alt="NEO Store" />
+    <h2>NEO Store</h2>
+    <p>Панель управления</p>
+</div>
+{% endblock %}
+
+{% block content %}
+{{ block.super }}
+<div class="login-help">
+    <a href="{% url 'store:index' %}">← Вернуться на сайт</a>
+</div>
+{% endblock %}
