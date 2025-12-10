@@ -178,6 +178,9 @@
     /* Фиксированные размеры для стабильности */
     flex-shrink: 0;
     box-sizing: border-box;
+    /* Оптимизация для мгновенного отображения */
+    will-change: contents;
+    contain: layout style paint;
 }
 
 .wb-product-image {
@@ -191,6 +194,12 @@
     background: #fff;
     /* Убираем float */
     display: block;
+    /* Оптимизация загрузки - убираем задержки */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    opacity: 1;
+    /* Мгновенное отображение без fade-in */
+    animation: none;
 }
 
 .wb-product-card:hover .wb-product-image {

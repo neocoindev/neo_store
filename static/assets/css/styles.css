@@ -1924,13 +1924,25 @@ nav a:hover {
 .navigation-portrait .nav-menu>li>a {
     height: auto;
     width: 100%;
-    padding: 12px 15px 12px 26px
+    padding: 12px 15px 12px 26px;
+    color: #2c2c2c;
+    display: block;
 }
 
-.nav-menu>.active>a,
-.nav-menu>.focus>a,
-.nav-menu>li:hover>a {
+/* Hover для десктопной версии */
+.navigation-landscape .nav-menu>.active>a,
+.navigation-landscape .nav-menu>.focus>a,
+.navigation-landscape .nav-menu>li:hover>a {
     color: #ffffff !important;
+}
+
+/* Hover для мобильной версии - темный текст на светлом фоне */
+.navigation-portrait .nav-menu>.active>a,
+.navigation-portrait .nav-menu>.focus>a,
+.navigation-portrait .nav-menu>li:hover>a,
+.navigation-portrait .nav-menu>li:active>a {
+    color: #FF0000 !important;
+    background-color: #f8f8f8;
 }
 
 .nav-menu>li>a>[class*=ion-],
@@ -2057,7 +2069,7 @@ nav a:hover {
 .nav-search {
     height: 70px;
     float: right;
-    z-index: 19998
+    z-index: 999
 }
 
 .navigation-portrait .nav-search {
@@ -2134,7 +2146,7 @@ nav a:hover {
     left: 0;
     top: 0;
     background-color: #fff;
-    z-index: 99
+    z-index: 999
 }
 
 .nav-search-inner {
@@ -2238,7 +2250,7 @@ nav a:hover {
     padding: 0;
     display: none;
     position: absolute;
-    z-index: 98;
+    z-index: 1000;
     white-space: nowrap
 }
 
@@ -2338,7 +2350,15 @@ nav a:hover {
 }
 
 .navigation-portrait .nav-dropdown>li>a {
-    padding: 12px 20px 12px 30px
+    padding: 12px 20px 12px 30px;
+    color: #2c2c2c;
+    display: block;
+}
+
+.navigation-portrait .nav-dropdown>li:hover>a,
+.navigation-portrait .nav-dropdown>li:active>a {
+    color: #FF0000 !important;
+    background-color: #f8f8f8;
 }
 
 .navigation-portrait .nav-dropdown>li>ul>li>a {

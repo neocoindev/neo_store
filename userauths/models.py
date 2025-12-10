@@ -41,7 +41,17 @@ class Profile(models.Model):
     
     def save(self, *args, **kwargs):
         if self.full_name == "" or self.full_name == None:
-             self.full_name = self.user.full_name
+            # Формируем полное имя из first_name и last_name, или используем username/email
+            full_name_parts = []
+            if self.user.first_name:
+                full_name_parts.append(self.user.first_name)
+            if self.user.last_name:
+                full_name_parts.append(self.user.last_name)
+            
+            if full_name_parts:
+                self.full_name = ' '.join(full_name_parts)
+            else:
+                self.full_name = self.user.username or self.user.email.split('@')[0]
         super(Profile, self).save(*args, **kwargs)
 
     

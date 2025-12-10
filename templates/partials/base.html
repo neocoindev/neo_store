@@ -41,9 +41,46 @@
                 top: 50px !important;
                 margin-top: 0 !important;
                 padding-top: 15px !important;
+                z-index: 1000 !important;
             }
             .nav-menu>li>.nav-dropdown:before {
                 top: -12px !important;
+            }
+            
+            /* Dropdown должен быть выше поиска */
+            .nav-dropdown {
+                z-index: 1000 !important;
+            }
+            
+            /* Мобильная версия - поддержка hover/touch для dropdown */
+            @media (max-width: 992px) {
+                .nav-menu>li:hover .nav-dropdown,
+                .nav-menu>li:focus .nav-dropdown,
+                .nav-menu>li.active .nav-dropdown {
+                    display: block !important;
+                }
+                
+                /* Touch-friendly hover для мобильных устройств */
+                .nav-menu>li:active .nav-dropdown {
+                    display: block !important;
+                }
+                
+                /* Поддержка hover через JavaScript для touch устройств */
+                .nav-menu>li.touch-hover .nav-dropdown {
+                    display: block !important;
+                }
+                
+                /* Убеждаемся, что текст виден в мобильном меню */
+                .navigation-portrait .nav-menu>li>a {
+                    color: #2c2c2c !important;
+                }
+                
+                .navigation-portrait .nav-menu>li:hover>a,
+                .navigation-portrait .nav-menu>li:active>a,
+                .navigation-portrait .nav-menu>li.focus>a {
+                    color: #FF0000 !important;
+                    background-color: #f8f8f8;
+                }
             }
             @media (max-width: 992px) {
                 .nav-menu .btn.bg-primary {
@@ -71,6 +108,18 @@
                 }
                 .logo-desktop {
                     display: block !important;
+                }
+            }
+            
+            /* Скрыть кнопку "Меню" в мобильной версии */
+            @media (max-width: 992px) {
+                .sidebar-toggle-btn {
+                    display: none !important;
+                }
+                
+                /* Скрыть иконки в header (пользователь, уведомления, корзина) в мобильной версии */
+                .mobile_nav {
+                    display: none !important;
                 }
             }
         </style>
@@ -171,7 +220,7 @@
                                         <a href="{% url 'customer:dashboard' %}"><i class="fas fa-user text-white"></i></a>
                                     </li>
                                     <li>
-                                        <a href="{% url 'customer:wishlist' %}"><i class="fas fa-heart text-white"></i><span class="dn-counter">{{ wishlist_count.count }}</span> </a>
+                                        <a href="{% url 'customer:wishlist' %}"><i class="fas fa-heart text-white"></i><span class="dn-counter">{{ wishlist_count }}</span> </a>
                                     </li>
                                {% endif %}
                                 
@@ -269,6 +318,69 @@
         <script src="{% static 'assets/js/custom.js' %}"></script>
         <script src="{% static 'assets/js/function.js' %}?v=2"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <!-- Мобильный hover для dropdown menu -->
+        <script>
+            (function() {
+                // Определяем, является ли устройство touch-устройством
+                const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                
+                if (isTouchDevice && window.innerWidth <= 992) {
+                    // Обработка touch событий для dropdown menu
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const navMenuItems = document.querySelectorAll('.nav-menu > li');
+                        
+                        navMenuItems.forEach(function(item) {
+                            const dropdown = item.querySelector('.nav-dropdown');
+                            
+                            if (dropdown) {
+                                let touchTimer;
+                                let isOpen = false;
+                                
+                                // Обработка touchstart
+                                item.addEventListener('touchstart', function(e) {
+                                    e.preventDefault();
+                                    clearTimeout(touchTimer);
+                                    
+                                    // Если dropdown закрыт, открываем его
+                                    if (!isOpen) {
+                                        // Закрываем все другие dropdown
+                                        navMenuItems.forEach(function(otherItem) {
+                                            if (otherItem !== item) {
+                                                const otherDropdown = otherItem.querySelector('.nav-dropdown');
+                                                if (otherDropdown) {
+                                                    otherDropdown.style.display = 'none';
+                                                    otherItem.classList.remove('touch-hover');
+                                                }
+                                            }
+                                        });
+                                        
+                                        // Открываем текущий dropdown
+                                        dropdown.style.display = 'block';
+                                        item.classList.add('touch-hover');
+                                        isOpen = true;
+                                    } else {
+                                        // Если открыт, закрываем
+                                        dropdown.style.display = 'none';
+                                        item.classList.remove('touch-hover');
+                                        isOpen = false;
+                                    }
+                                }, { passive: false });
+                                
+                                // Обработка клика вне элемента для закрытия
+                                document.addEventListener('touchstart', function(e) {
+                                    if (!item.contains(e.target) && !dropdown.contains(e.target)) {
+                                        dropdown.style.display = 'none';
+                                        item.classList.remove('touch-hover');
+                                        isOpen = false;
+                                    }
+                                });
+                            }
+                        });
+                    });
+                }
+            })();
+        </script>
 
         <!-- Адаптивный JavaScript для мобильных устройств -->
         <script>
@@ -427,14 +539,31 @@
                 <span class="mobile-nav-badge">{{ total_cart_items }}</span>
                 {% endif %}
             </a>
-            <a href="#" class="mobile-nav-item">
-                <i class="fas fa-heart"></i>
-                <span>Избранное</span>
-            </a>
-            <a href="{% url 'userauths:sign-in' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'sign-in' or request.resolver_match.url_name == 'sign-up' %}active{% endif %}">
-                <i class="fas fa-user"></i>
-                <span>Профиль</span>
-            </a>
+            {% if request.user.is_authenticated %}
+                <a href="{% url 'customer:wishlist' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'wishlist' %}active{% endif %}">
+                    <i class="fas fa-heart"></i>
+                    <span>Избранное</span>
+                    {% if wishlist_count > 0 %}
+                    <span class="mobile-nav-badge">{{ wishlist_count }}</span>
+                    {% endif %}
+                </a>
+            {% else %}
+                <a href="{% url 'userauths:sign-in' %}" class="mobile-nav-item">
+                    <i class="fas fa-heart"></i>
+                    <span>Избранное</span>
+                </a>
+            {% endif %}
+            {% if request.user.is_authenticated %}
+                <a href="{% url 'customer:profile' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                    <i class="fas fa-user"></i>
+                    <span>Профиль</span>
+                </a>
+            {% else %}
+                <a href="{% url 'userauths:sign-in' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'sign-in' or request.resolver_match.url_name == 'sign-up' %}active{% endif %}">
+                    <i class="fas fa-user"></i>
+                    <span>Профиль</span>
+                </a>
+            {% endif %}
         </div>
 
     </body>

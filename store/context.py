@@ -11,7 +11,10 @@ def default(request):
         total_cart_items = 0
 
     try:
-        wishlist_count = customer_models.Wishlist.objects.filter(user=request.user)
+        if request.user.is_authenticated:
+            wishlist_count = customer_models.Wishlist.objects.filter(user=request.user).count()
+        else:
+            wishlist_count = 0
     except:
         wishlist_count = 0
 

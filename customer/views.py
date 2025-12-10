@@ -8,6 +8,7 @@ from django.contrib.auth.hashers import check_password
 from plugin.paginate_queryset import paginate_queryset
 from store import models as store_models
 from customer import models as customer_models
+from userauths.models import Profile
 
 @login_required
 def dashboard(request):
@@ -65,6 +66,7 @@ def wishlist(request):
     context = {
         "wishlist": wishlist,
         "wishlist_list": wishlist_list,
+        "wishlist_count": wishlist_list.count(),
     }
 
     return render(request, "customer/wishlist.html", context)
@@ -190,7 +192,23 @@ def delete_address(request, id):
 
 @login_required
 def profile(request):
-    profile = request.user.profile
+    # Создаем профиль автоматически, если его нет
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    
+    # Если профиль был только что создан, устанавливаем значения по умолчанию
+    if created:
+        # Формируем полное имя из first_name и last_name, или используем username/email
+        full_name_parts = []
+        if request.user.first_name:
+            full_name_parts.append(request.user.first_name)
+        if request.user.last_name:
+            full_name_parts.append(request.user.last_name)
+        
+        if full_name_parts:
+            profile.full_name = ' '.join(full_name_parts)
+        else:
+            profile.full_name = request.user.username or request.user.email.split('@')[0]
+        profile.save()
 
     if request.method == "POST":
         image = request.FILES.get("image")

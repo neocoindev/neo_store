@@ -397,6 +397,9 @@
         padding-top: 100%;
         background: #f8f8f8;
         overflow: hidden;
+        /* Оптимизация для мгновенного отображения */
+        will-change: contents;
+        contain: layout style paint;
     }
     
     .wb-product-image {
@@ -407,6 +410,12 @@
         height: 100%;
         object-fit: cover;
         transition: transform 0.3s;
+        /* Оптимизация загрузки - убираем задержки */
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+        opacity: 1;
+        /* Мгновенное отображение */
+        animation: none;
     }
     
     .wb-product-card:hover .wb-product-image {
@@ -873,6 +882,9 @@
                                 src="{% if p.image %}{{ p.image.url }}{% else %}{% static 'images/default-product.jpg' %}{% endif %}" 
                                 alt="{{ p.name }}" 
                                 class="wb-product-image"
+                                loading="eager"
+                                decoding="async"
+                                fetchpriority="high"
                             />
                         </div>
                         <div class="wb-product-info">
@@ -933,5 +945,25 @@
         </div>
     </div>
 </div>
+
+<!-- Предзагрузка изображений товаров для мгновенного отображения -->
+<script>
+// Предзагрузка изображений для мгновенного отображения
+(function() {
+    'use strict';
+    const productImages = document.querySelectorAll('.wb-product-image');
+    productImages.forEach(function(img) {
+        if (img.src && img.src !== window.location.href) {
+            const link = document.createElement('link');
+            link.rel = 'preload';
+            link.as = 'image';
+            link.href = img.src;
+            link.fetchPriority = 'high';
+            document.head.appendChild(link);
+        }
+    });
+})();
+</script>
+<script src="{% static 'assets/js/image-preloader.js' %}"></script>
 
 {% endblock content %}

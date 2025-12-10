@@ -8,9 +8,22 @@
         <a href="{% url 'store:product_detail' p.slug %}" style="text-decoration: none; color: inherit;">
             <div class="wb-product-image-wrapper">
                 {% if p.image %}
-                    <img src="{{ p.image.url }}" alt="{{ p.name }}" class="wb-product-image" />
+                    <img 
+                        src="{{ p.image.url }}" 
+                        alt="{{ p.name }}" 
+                        class="wb-product-image" 
+                        loading="eager"
+                        decoding="async"
+                        fetchpriority="high"
+                    />
                 {% else %}
-                    <img src="{% static 'images/default-product.jpg' %}" alt="No image" class="wb-product-image" />
+                    <img 
+                        src="{% static 'images/default-product.jpg' %}" 
+                        alt="No image" 
+                        class="wb-product-image" 
+                        loading="eager"
+                        decoding="async"
+                    />
                 {% endif %}
                 
                 <!-- Бейдж скидки (если есть старая цена) -->
