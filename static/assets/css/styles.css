@@ -1936,13 +1936,57 @@ nav a:hover {
     color: #ffffff !important;
 }
 
-/* Hover для мобильной версии - темный текст на светлом фоне */
+/* Hover для мобильной версии - только активные элементы, без hover */
 .navigation-portrait .nav-menu>.active>a,
-.navigation-portrait .nav-menu>.focus>a,
-.navigation-portrait .nav-menu>li:hover>a,
-.navigation-portrait .nav-menu>li:active>a {
+.navigation-portrait .nav-menu>.focus>a {
     color: #FF0000 !important;
     background-color: #f8f8f8;
+}
+
+/* Отключаем hover эффекты для мобильных устройств */
+@media (max-width: 992px) {
+    /* Основное меню */
+    .navigation-portrait .nav-menu>li:hover>a,
+    .navigation-portrait .nav-menu>li:active>a {
+        color: #2c2c2c !important;
+        background-color: transparent !important;
+    }
+    
+    /* Dropdown меню */
+    .navigation-portrait .nav-dropdown>li:hover>a,
+    .navigation-portrait .nav-dropdown>li:active>a {
+        color: #2c2c2c !important;
+        background-color: transparent !important;
+    }
+    
+    /* Индикаторы подменю */
+    .nav-menu>li:hover>a .submenu-indicator-chevron {
+        transform: none !important;
+    }
+    
+    /* Light menu */
+    .light-menu .nav-menu>li:hover>a {
+        color: inherit !important;
+        background-color: transparent !important;
+    }
+    
+    .light-menu .nav-menu>li:hover>a .submenu-indicator-chevron {
+        transform: none !important;
+    }
+    
+    /* Brand logo */
+    .nav-brand:hover,
+    .light-menu .nav-brand:hover {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+    
+    /* Все hover эффекты навигации отключены */
+    .nav-menu>li:hover,
+    .nav-dropdown>li:hover,
+    .nav-menu>li:hover .nav-dropdown {
+        /* Отключены все hover эффекты */
+    }
 }
 
 .nav-menu>li>a>[class*=ion-],
@@ -2355,11 +2399,7 @@ nav a:hover {
     display: block;
 }
 
-.navigation-portrait .nav-dropdown>li:hover>a,
-.navigation-portrait .nav-dropdown>li:active>a {
-    color: #FF0000 !important;
-    background-color: #f8f8f8;
-}
+/* Отключено для мобильных - см. медиа-запрос выше */
 
 .navigation-portrait .nav-dropdown>li>ul>li>a {
     padding-left: 50px

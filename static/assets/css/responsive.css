@@ -1373,14 +1373,22 @@
     line-height: 1.2;
 }
 
-.mobile-nav-item:hover,
+/* Отключены hover эффекты для мобильных - только активные состояния */
 .mobile-nav-item:focus {
     color: #FF0000;
     text-decoration: none;
 }
 
-.mobile-nav-item:hover i,
 .mobile-nav-item:focus i {
+    color: #FF0000;
+}
+
+/* Активное состояние через класс, без hover */
+.mobile-nav-item.active {
+    color: #FF0000;
+}
+
+.mobile-nav-item.active i {
     color: #FF0000;
 }
 

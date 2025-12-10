@@ -216,3 +216,4 @@ products = store_models.Product.objects.filter(status="Published")
 **Автор:** AI Assistant
 
 
+

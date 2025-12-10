@@ -847,8 +847,14 @@
         
         // Используем makeFilterRequest для shop страницы
         makeFilterRequest();
-        updateURL();
-        updateActiveFilters();
+        
+        // Обновляем URL и активные фильтры (если функции существуют)
+        if (typeof updateURL === 'function') {
+            updateURL();
+        }
+        if (typeof updateActiveFilters === 'function') {
+            updateActiveFilters();
+        }
     }
     
     // Синхронизация мобильных фильтров с desktop формой

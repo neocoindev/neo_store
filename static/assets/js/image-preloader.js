@@ -130,25 +130,43 @@
         }
     }
 
-    // Предзагрузка при наведении на карточку товара
-    document.addEventListener('mouseenter', function(e) {
-        // Проверяем, что target является элементом, а не текстовым узлом
-        const target = e.target.nodeType === 1 ? e.target : e.target.parentElement;
-        if (!target) return;
-        
-        const card = target.closest ? target.closest('.wb-product-card') : null;
-        if (card) {
-            const img = card.querySelector('.wb-product-image');
-            if (img && !img.complete) {
-                // Предзагружаем изображение при наведении
-                const link = document.createElement('link');
-                link.rel = 'prefetch';
-                link.as = 'image';
-                link.href = img.src;
-                document.head.appendChild(link);
+    // Предзагрузка при наведении на карточку товара (только для desktop)
+    if (window.innerWidth > 991) {
+        document.addEventListener('mouseenter', function(e) {
+            // Проверяем, что target является элементом
+            if (!e.target || e.target.nodeType !== Node.ELEMENT_NODE) {
+                return;
             }
-        }
-    }, true);
+            
+            // Используем более надежную проверку closest
+            let card = null;
+            try {
+                card = e.target.closest('.wb-product-card');
+            } catch (err) {
+                // Если closest не поддерживается, ищем родительский элемент
+                let element = e.target;
+                while (element && element !== document.body) {
+                    if (element.classList && element.classList.contains('wb-product-card')) {
+                        card = element;
+                        break;
+                    }
+                    element = element.parentElement;
+                }
+            }
+            
+            if (card) {
+                const img = card.querySelector('.wb-product-image');
+                if (img && img.src && !img.complete) {
+                    // Предзагружаем изображение при наведении
+                    const link = document.createElement('link');
+                    link.rel = 'prefetch';
+                    link.as = 'image';
+                    link.href = img.src;
+                    document.head.appendChild(link);
+                }
+            }
+        }, true);
+    }
 
 })();
 

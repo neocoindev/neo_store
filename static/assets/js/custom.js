@@ -14,6 +14,9 @@ $(function () {
     // Script Navigation
     !(function (n, e, i, a) {
         (n.navigation = function (t, s) {
+            // Определяем, мобильное ли устройство
+            var isMobileDevice = window.innerWidth <= 992 || navigator.userAgent.match(/Mobi/i) || navigator.maxTouchPoints > 0;
+            
             var o = {
                     responsive: !0,
                     mobileBreakpoint: 992,
@@ -21,7 +24,7 @@ $(function () {
                     hideDuration: 300,
                     showDelayDuration: 0,
                     hideDelayDuration: 0,
-                    submenuTrigger: "hover",
+                    submenuTrigger: isMobileDevice ? "click" : "hover", // Для мобильных используем click вместо hover
                     effect: "fade",
                     submenuIndicator: !0,
                     hideSubWhenGoOut: !0,
@@ -177,32 +180,42 @@ $(function () {
                 },
                 k = function () {
                     w(),
-                        n(t).find(".nav-submenu").hide(0),
-                        navigator.userAgent.match(/Mobi/i) || navigator.maxTouchPoints > 0 || "click" == u.settings.submenuTrigger
-                            ? n(t)
-                                  .find(".nav-menu, .nav-dropdown")
-                                  .children("li")
-                                  .children("a")
-                                  .on(f, function (i) {
-                                      if ((u.hideSubmenu(n(this).parent("li").siblings("li"), u.settings.effect), n(this).closest(".nav-menu").siblings(".nav-menu").find(".nav-submenu").fadeOut(u.settings.hideDuration), n(this).siblings(".nav-submenu").length > 0)) {
-                                          if ((i.stopPropagation(), i.preventDefault(), "none" == n(this).siblings(".nav-submenu").css("display"))) return u.showSubmenu(n(this).parent("li"), u.settings.effect), C(), !1;
-                                          if ((u.hideSubmenu(n(this).parent("li"), u.settings.effect), "_blank" == n(this).attr("target") || "blank" == n(this).attr("target"))) e.open(n(this).attr("href"));
-                                          else {
-                                              if ("#" == n(this).attr("href") || "" == n(this).attr("href")) return !1;
-                                              e.location.href = n(this).attr("href");
-                                          }
-                                      }
-                                  })
-                            : n(t)
-                                  .find(".nav-menu")
-                                  .find("li")
-                                  .on(l, function () {
-                                      u.showSubmenu(this, u.settings.effect), C();
-                                  })
-                                  .on(c, function () {
-                                      u.hideSubmenu(this, u.settings.effect);
-                                  }),
-                        u.settings.hideSubWhenGoOut && b();
+                        n(t).find(".nav-submenu").hide(0);
+                    
+                    // Для мобильных устройств всегда используем click, без hover
+                    var isMobile = g() <= u.settings.mobileBreakpoint || navigator.userAgent.match(/Mobi/i) || navigator.maxTouchPoints > 0;
+                    
+                    if (isMobile || "click" == u.settings.submenuTrigger) {
+                        // Используем только click/touch для мобильных
+                        n(t)
+                            .find(".nav-menu, .nav-dropdown")
+                            .children("li")
+                            .children("a")
+                            .off(l).off(c) // Отключаем hover обработчики
+                            .on(f, function (i) {
+                                if ((u.hideSubmenu(n(this).parent("li").siblings("li"), u.settings.effect), n(this).closest(".nav-menu").siblings(".nav-menu").find(".nav-submenu").fadeOut(u.settings.hideDuration), n(this).siblings(".nav-submenu").length > 0)) {
+                                    if ((i.stopPropagation(), i.preventDefault(), "none" == n(this).siblings(".nav-submenu").css("display"))) return u.showSubmenu(n(this).parent("li"), u.settings.effect), C(), !1;
+                                    if ((u.hideSubmenu(n(this).parent("li"), u.settings.effect), "_blank" == n(this).attr("target") || "blank" == n(this).attr("target"))) e.open(n(this).attr("href"));
+                                    else {
+                                        if ("#" == n(this).attr("href") || "" == n(this).attr("href")) return !1;
+                                        e.location.href = n(this).attr("href");
+                                    }
+                                }
+                            });
+                    } else {
+                        // Для desktop используем hover
+                        n(t)
+                            .find(".nav-menu")
+                            .find("li")
+                            .off(f) // Отключаем click обработчики для desktop
+                            .on(l, function () {
+                                u.showSubmenu(this, u.settings.effect), C();
+                            })
+                            .on(c, function () {
+                                u.hideSubmenu(this, u.settings.effect);
+                            });
+                    }
+                    u.settings.hideSubWhenGoOut && b();
                 },
                 D = function () {
                     w(),
