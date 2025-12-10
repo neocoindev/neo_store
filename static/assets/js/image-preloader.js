@@ -8,19 +8,28 @@
 (function() {
     'use strict';
 
-    // Предзагрузка изображений товаров
+    // Оптимизированная предзагрузка - только видимые изображения
     function preloadProductImages() {
+        // На мобильных устройствах не предзагружаем все изображения сразу
+        const isMobile = window.innerWidth <= 991;
+        if (isMobile) {
+            // На мобильных используем lazy loading - загружаем только видимые
+            return;
+        }
+        
+        // На desktop предзагружаем только первые 6 изображений (видимые)
         const productImages = document.querySelectorAll('.wb-product-image');
+        const visibleImages = Array.from(productImages).slice(0, 6);
         const imageUrls = [];
         
-        // Собираем все URL изображений
-        productImages.forEach(function(img) {
+        // Собираем URL только видимых изображений
+        visibleImages.forEach(function(img) {
             if (img.src && img.src !== window.location.href) {
                 imageUrls.push(img.src);
             }
         });
         
-        // Предзагружаем изображения
+        // Предзагружаем только видимые изображения
         imageUrls.forEach(function(url) {
             const link = document.createElement('link');
             link.rel = 'preload';
@@ -29,8 +38,6 @@
             link.fetchPriority = 'high';
             document.head.appendChild(link);
         });
-        
-        console.log('Preloaded', imageUrls.length, 'product images');
     }
 
     // Оптимизация загрузки изображений при скролле
@@ -89,22 +96,47 @@
         });
     }
 
-    // Инициализация при загрузке DOM
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            preloadProductImages();
-            optimizeImageLoading();
+    // Оптимизированная инициализация - только для видимых изображений
+    function initImageOptimization() {
+        const isMobile = window.innerWidth <= 991;
+        
+        // На мобильных используем только lazy loading
+        if (isMobile) {
             prioritizeVisibleImages();
-        });
-    } else {
+            return;
+        }
+        
+        // На desktop используем все оптимизации
         preloadProductImages();
         optimizeImageLoading();
         prioritizeVisibleImages();
     }
+    
+    // Инициализация при загрузке DOM (оптимизировано)
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            // Используем requestIdleCallback для некритичных операций
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(initImageOptimization, { timeout: 2000 });
+            } else {
+                setTimeout(initImageOptimization, 100);
+            }
+        }, { once: true });
+    } else {
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(initImageOptimization, { timeout: 2000 });
+        } else {
+            setTimeout(initImageOptimization, 100);
+        }
+    }
 
     // Предзагрузка при наведении на карточку товара
     document.addEventListener('mouseenter', function(e) {
-        const card = e.target.closest('.wb-product-card');
+        // Проверяем, что target является элементом, а не текстовым узлом
+        const target = e.target.nodeType === 1 ? e.target : e.target.parentElement;
+        if (!target) return;
+        
+        const card = target.closest ? target.closest('.wb-product-card') : null;
         if (card) {
             const img = card.querySelector('.wb-product-image');
             if (img && !img.complete) {

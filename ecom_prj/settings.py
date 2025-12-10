@@ -12,12 +12,30 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
-from environs import Env
 import os
 from django.contrib import messages
 
-env = Env()
-env.read_env()
+# Опциональный импорт environs для миграций
+try:
+    from environs import Env
+    env = Env()
+    env.read_env()
+except ImportError:
+    # Fallback для случаев, когда environs не установлен
+    class FakeEnv:
+        def str(self, key, default=''):
+            return os.environ.get(key, default)
+        def bool(self, key, default=False):
+            value = os.environ.get(key, str(default))
+            return value.lower() in ('true', '1', 'yes', 'on') if isinstance(value, str) else bool(value)
+        def list(self, key, default=None):
+            value = os.environ.get(key, '')
+            if value:
+                return [item.strip() for item in value.split(',')]
+            return default if default is not None else []
+        def read_env(self):
+            pass
+    env = FakeEnv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

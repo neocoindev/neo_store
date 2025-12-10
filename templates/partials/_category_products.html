@@ -1,0 +1,92 @@
+{% load static %}
+{% load currency_tags %}
+
+{% for p in products %}
+<div class="col-lg-4 col-md-6 mb-4">
+    <div class="product_grid card b-0 rounded-3 shadow m-2 p-2">
+        <div class="card-body p-0">
+            <div class="shop_thumb position-relative">
+                <a class="card-img-top d-block overflow-hidden" href="{% url 'store:product_detail' p.slug %}">
+                    {% if p.image %}
+                        <img class="card-img-top" style="width: 100%; height: 230px; object-fit: cover;" 
+                             src="{{p.image.url}}" 
+                             alt="{{p.name}}" 
+                             loading="lazy" 
+                             decoding="async" />
+                    {% else %}
+                        <img class="card-img-top" style="width: 100%; height: 230px; object-fit: cover;" 
+                             src="/static/images/default-product.jpg" 
+                             alt="Изображение отсутствует" 
+                             loading="lazy" 
+                             decoding="async" />
+                    {% endif %}
+                    {% if p.regular_price and p.regular_price > p.price %}
+                    <div class="position-absolute top-0 end-0 m-2">
+                        <span class="badge bg-danger">Скидка</span>
+                    </div>
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+        <div class="card-footer b-0 p-0 pt-2 bg-white d-flex align-items-start justify-content-between">
+            <div class="text-left w-100">
+                <div class="text-left">
+                    <div class="elso_titl"><span class="small">{{p.category.title}}</span></div>
+                    <h5 class="fs-md mb-0 lh-1 mb-1">
+                        <a href="{% url 'store:product_detail' p.slug %}" class="text-dark text-decoration-none">{{p.name}}</a>
+                    </h5>
+                    <div class="star-rating align-items-center d-flex justify-content-left mb-2 p-0 mt-3">
+                        {% if not p.average_rating %}
+                        <i class="fas fa-star text-warning"></i>
+                        {% elif p.average_rating > 0 and p.average_rating < 2 %}
+                        <i class="fas fa-star text-warning"></i>
+                        {% elif p.average_rating > 1 and p.average_rating < 3 %}
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        {% elif p.average_rating > 2 and p.average_rating < 4 %}
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        {% elif p.average_rating > 3 and p.average_rating < 5 %}
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        {% elif p.average_rating > 4 %}
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        {% endif %}
+                    </div>
+                    <div class="elis_rty">
+                        <span class="ft-bold text-dark fs-sm">{% format_currency p.price %}</span>
+                        {% if p.regular_price and p.regular_price > p.price %}
+                        <span class="text-muted text-decoration-line-through ms-2 small">{% format_currency p.regular_price %}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3 mt-2">
+                    <button type="button" class="btn btn-sm bg-primary text-white rounded add_to_cart" data-id="{{p.id}}">
+                        В корзину <i class="fas fa-shopping-cart ms-2"></i>
+                    </button>
+                    <a href="#" class="me-2 add_to_wishlist" data-product_id="{{p.id}}" aria-label="Добавить в избранное" title="Добавить в избранное">
+                        <i class="fas fa-heart fs-4 text-dark"></i>
+                    </a>
+                    <input type="hidden" class="quantity" value="1" name="" id="">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% empty %}
+<div class="col-12">
+    <div class="text-center py-5">
+        <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+        <p class="text-muted fs-5">В этой категории нет товаров</p>
+        <p class="text-muted small">Попробуйте изменить параметры фильтрации</p>
+    </div>
+</div>
+{% endfor %}
+

@@ -85,9 +85,9 @@ def add_to_wishlist(request, id):
         product = store_models.Product.objects.get(id=id)
         customer_models.Wishlist.objects.create(product=product, user=request.user)
         wishlist = customer_models.Wishlist.objects.filter(user=request.user)
-        return JsonResponse({"message": "Item added to wishlist", "wishlist_count": wishlist.count()})
+        return JsonResponse({"message": "Товар добавлен в избранное", "wishlist_count": wishlist.count()})
     else:
-        return JsonResponse({"message": "User is not logged in", "wishlist_count": "0"})
+        return JsonResponse({"message": "Пользователь не авторизован", "wishlist_count": "0"})
 
 
 

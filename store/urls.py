@@ -7,6 +7,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("shop/", views.shop, name="shop"),
     path("category/<id>/", views.category, name="category"),
+    path("category/<id>/filter/", views.category_filter_ajax, name="category_filter_ajax"),
     path("detail/<slug>/", views.product_detail, name="product_detail"),
     path("cart/", views.cart, name="cart"),
     path("create_order/", views.create_order, name="create_order"),

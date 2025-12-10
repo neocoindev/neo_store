@@ -2,83 +2,702 @@
 {% load static %} 
 {% load humanize %} 
 {% load currency_tags %}
+{% load store_filters %}
+
 {% block content %}
+<!-- Подключение стилей для фильтров -->
+<link href="{% static 'assets/css/shop.css' %}" rel="stylesheet" />
+<link href="{% static 'assets/css/filters.css' %}" rel="stylesheet" />
 	
 	<section class="middle">
 		<div class="container">
-			<h2 class="fw-bold mb-5">{{category.title}} (<span class="product_count">{{ products_list.count }}</span>)</h2>
-			<form class="mb-5 d-flex justify-content-between align-items-center gap-2">
-				<input type="text" class="form-control rounded" placeholder="Search Products..." name="q" id="">
-				<button type="submit" class="btn bg-primary text-white rounded "><i class="fas fa-search"></i></button>
+        <!-- Заголовок с количеством товаров -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0">{{category.title}} (<span class="product_count" id="product-count">{{ products_list.count }}</span>)</h2>
+        </div>
+        
+        <!-- Выбранные фильтры (теги) - обновляется через AJAX -->
+        <div id="active-filters-container-top">
+            {% if active_filters %}
+            {% include 'partials/_category_filters_tags.html' %}
+            {% endif %}
+        </div>
+        
+        <!-- Секция поиска и сортировки -->
+        <div class="wb-filters-section mb-4">
+            <form method="GET" action="{% url 'store:category' category.id %}" id="category-search-form">
+                <div class="row align-items-center mb-3">
+                    <div class="col-md-6">
+                        <div class="d-flex gap-2">
+                            <input 
+                                type="text" 
+                                class="form-control rounded" 
+                                placeholder="Поиск товаров..." 
+                                name="q" 
+                                value="{{ request.GET.q|default:'' }}"
+                            />
+                            <button type="submit" class="btn bg-primary text-white rounded" aria-label="Поиск">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-end align-items-center gap-2">
+                            <label class="mb-0 small text-muted">Сортировка:</label>
+                            <select name="sort" class="form-select form-select-sm" style="width: auto;" id="sort-select">
+                                {% for option in sort_options %}
+                                <option value="{{ option.value }}" {% if current_sort == option.value %}selected{% endif %}>
+                                    {{ option.label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <!-- Скрытые поля для сохранения фильтров при поиске -->
+                {% for key, value_list in request.GET.lists %}
+                    {% if key != 'q' and key != 'page' and key != 'sort' %}
+                        {% for value in value_list %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
 			</form>
+        </div>
+        
 			<div class="row">
-				<div class="col-lg-12"> 
-					<div class="row align-items-center rows-products" id="products-list">						
-						 
-						 {% for p in products %}
-							<div class="col-lg-3">
-								<div class="product_grid card b-0  rounded-3 shadow m-2 p-2">
-									<div class="card-body p-0">
-										<div class="shop_thumb position-relative">
-											<a class="card-img-top d-block overflow-hidden" href="{% url 'store:product_detail' p.slug %}">
-												{% if p.image %}
-													<img class="card-img-top" style="width: 100%; height: 230px; object-fit: cover;" src="{{p.image.url}}" alt="..." />
-												{% else %}
-													<img class="card-img-top" style="width: 100%; height: 230px; object-fit: cover;" src="/static/images/default-product.jpg" alt="No image" />
-												{% endif %}
-											</a>
-										</div>
-									</div>
-									<div class="card-footer b-0 p-0 pt-2 bg-white d-flex align-items-start justify-content-between">
-										<div class="text-left">
-											<div class="text-left">
-												<div class="elso_titl"><span class="small">{{p.category.title}}</span></div>
-												<h5 class="fs-md mb-0 lh-1 mb-1"><a href="{% url 'store:product_detail' p.slug %}">{{p.name}}</a></h5>
-												  <div class="star-rating align-items-center d-flex justify-content-left mb-2 p-0 mt-3">
-													{% if not p.average_rating  %}
-													<i class="fas fa-star text-warning"></i>
-													{% elif p.average_rating > 0 and p.average_rating < 2 %}
-													<i class="fas fa-star text-warning"></i>
-													{% elif p.average_rating > 1 and p.average_rating < 3 %}
-													<i class="fas fa-star text-warning"></i>
-													<i class="fas fa-star text-warning"></i>
-													{% elif p.average_rating > 2 and p.average_rating < 4 %}
-													<i class="fas fa-star text-warning"></i>
-													<i class="fas fa-star text-warning"></i>
-													<i class="fas fa-star text-warning"></i>
-													{% elif p.average_rating > 3 and p.average_rating < 5 %}
-													<i class="fas fa-star text-warning"></i>
-													<i class="fas fa-star text-warning"></i>
-													<i class="fas fa-star text-warning"></i>
-													<i class="fas fa-star text-warning"></i>
-													{% elif p.average_rating > 4 %}
-													<i class="fas fa-star text-warning"></i>
-													<i class="fas fa-star text-warning"></i>
-													<i class="fas fa-star text-warning"></i>
-													<i class="fas fa-star text-warning"></i>
-													<i class="fas fa-star text-warning"></i>
-													{% endif %}
-												</div>
-												{% load currency_tags %}
-												<div class="elis_rty"><span class="ft-bold text-dark fs-sm">{% format_currency p.price %}</span></div>
-											</div>
-											<div class="d-flex align-items-center gap-3">
-												<button type="button" class="btn btn-sm bg-primary text-white rounded add_to_cart" data-id="{{p.id}}">В корзину <i class="fas fa-shopping-cart ms-2"></i></button>
-												<a href="#" class="me-2 add_to_wishlist" data-product_id="{{p.id}}"><i class="fas fa-heart fs-4 text-dark"></i></a>
-                                        		<input type="hidden" class="quantity" value="1" name="" id="">
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-                        {% empty %}
-                        <p>No product for this category</p>
-						 {% endfor %}
-							
-					</div>
+            <!-- Боковая панель фильтров (Desktop) -->
+            <div class="col-lg-3 wb-filters-sidebar">
+                <form method="GET" action="{% url 'store:category' category.id %}" id="category-filters-form">
+                    <!-- Сохраняем поисковый запрос и сортировку -->
+                    {% if request.GET.q %}
+                        <input type="hidden" name="q" value="{{ request.GET.q }}">
+                    {% endif %}
+                    {% if request.GET.sort %}
+                        <input type="hidden" name="sort" value="{{ request.GET.sort }}">
+                    {% endif %}
+                    
+                    <!-- Цена -->
+                    <div class="wb-filter-accordion active">
+                        <div class="wb-filter-accordion-header">
+                            <h4>Цена</h4>
+                            <span class="wb-filter-accordion-toggle"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="wb-filter-accordion-content">
+                            <div class="wb-price-filter">
+                                <div class="wb-price-inputs">
+                                    <input type="number" 
+                                           class="wb-filter-range" 
+                                           name="price_min"
+                                           placeholder="От" 
+                                           min="0" 
+                                           max="{{ filter_options.price_range.max_price|default:100000 }}"
+                                           value="{{ request.GET.price_min|default:'' }}"
+                                           step="100">
+                                    <span>-</span>
+                                    <input type="number" 
+                                           class="wb-filter-range" 
+                                           name="price_max"
+                                           placeholder="До" 
+                                           min="0" 
+                                           max="{{ filter_options.price_range.max_price|default:100000 }}"
+                                           value="{{ request.GET.price_max|default:'' }}"
+                                           step="100">
+                                </div>
+                                <div class="mt-2 small text-muted">
+                                    Диапазон: 
+                                    {% if filter_options.price_range.min_price %}
+                                        {{ filter_options.price_range.min_price|floatformat:0 }} - 
+                                        {{ filter_options.price_range.max_price|floatformat:0 }}
+                                    {% else %}
+                                        0 - 0
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Размеры -->
+                    {% if filter_options.sizes %}
+                    <div class="wb-filter-accordion active">
+                        <div class="wb-filter-accordion-header">
+                            <h4>Размер</h4>
+                            <span class="wb-filter-accordion-toggle"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="wb-filter-accordion-content">
+                            {% for size in filter_options.sizes %}
+                            <label class="wb-filter-item">
+                                <input type="checkbox" 
+                                       class="wb-filter-checkbox size-filter" 
+                                       name="size[]"
+                                       data-filter="size" 
+                                       data-value="{{ size.content }}" 
+                                       value="{{ size.content }}" 
+                                       id="size{{ forloop.counter }}"
+                                       {% if selected_filters.sizes and size.content in selected_filters.sizes %}checked{% endif %}>
+                                <span class="wb-filter-label">{{ size.title }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Цвета -->
+                    {% if filter_options.colors %}
+                    <div class="wb-filter-accordion active">
+                        <div class="wb-filter-accordion-header">
+                            <h4>Цвет</h4>
+                            <span class="wb-filter-accordion-toggle"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="wb-filter-accordion-content">
+                            {% for color in filter_options.colors %}
+                            <label class="wb-filter-item">
+                                <input type="checkbox" 
+                                       class="wb-filter-checkbox color-filter" 
+                                       name="color[]"
+                                       data-filter="color" 
+                                       data-value="{{ color.content }}" 
+                                       value="{{ color.content }}" 
+                                       id="color{{ forloop.counter }}"
+                                       {% if selected_filters.colors and color.content in selected_filters.colors %}checked{% endif %}>
+                                <span class="wb-filter-label">
+                                    {% if color.code %}
+                                    <span class="wb-color-indicator" style="background-color: {{ color.code }}; width: 16px; height: 16px; display: inline-block; border-radius: 3px; margin-right: 5px;"></span>
+                                    {% endif %}
+                                    {{ color.title }}
+                                </span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Бренды -->
+                    {% if filter_options.brands %}
+                    <div class="wb-filter-accordion active">
+                        <div class="wb-filter-accordion-header">
+                            <h4>Бренд</h4>
+                            <span class="wb-filter-accordion-toggle"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="wb-filter-accordion-content">
+                            {% for brand in filter_options.brands %}
+                            <label class="wb-filter-item">
+                                <input type="checkbox" 
+                                       class="wb-filter-checkbox brand-filter" 
+                                       name="brand[]"
+                                       data-filter="brand" 
+                                       data-value="{{ brand.brand }}" 
+                                       value="{{ brand.brand }}" 
+                                       id="brand{{ forloop.counter }}"
+                                       {% if selected_filters.brands and brand.brand in selected_filters.brands %}checked{% endif %}>
+                                <span class="wb-filter-label">{{ brand.brand }}</span>
+                                <span class="wb-filter-count">({{ brand.count }})</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Сезон -->
+                    {% if filter_options.seasons %}
+                    <div class="wb-filter-accordion active">
+                        <div class="wb-filter-accordion-header">
+                            <h4>Сезон</h4>
+                            <span class="wb-filter-accordion-toggle"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="wb-filter-accordion-content">
+                            {% for season in filter_options.seasons %}
+                            <label class="wb-filter-item">
+                                <input type="checkbox" 
+                                       class="wb-filter-checkbox season-filter" 
+                                       name="season[]"
+                                       data-filter="season" 
+                                       data-value="{{ season.season }}" 
+                                       value="{{ season.season }}" 
+                                       id="season{{ forloop.counter }}"
+                                       {% if selected_filters.seasons and season.season in selected_filters.seasons %}checked{% endif %}>
+                                <span class="wb-filter-label">{{ season.season }}</span>
+                                <span class="wb-filter-count">({{ season.count }})</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Материал -->
+                    {% if filter_options.materials %}
+                    <div class="wb-filter-accordion active">
+                        <div class="wb-filter-accordion-header">
+                            <h4>Материал</h4>
+                            <span class="wb-filter-accordion-toggle"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="wb-filter-accordion-content">
+                            {% for material in filter_options.materials %}
+                            <label class="wb-filter-item">
+                                <input type="checkbox" 
+                                       class="wb-filter-checkbox material-filter" 
+                                       name="material[]"
+                                       data-filter="material" 
+                                       data-value="{{ material.material }}" 
+                                       value="{{ material.material }}" 
+                                       id="material{{ forloop.counter }}"
+                                       {% if selected_filters.materials and material.material in selected_filters.materials %}checked{% endif %}>
+                                <span class="wb-filter-label">{{ material.material }}</span>
+                                <span class="wb-filter-count">({{ material.count }})</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Только распродажа -->
+                    <div class="wb-filter-accordion active">
+                        <div class="wb-filter-accordion-header">
+                            <h4>Скидки</h4>
+                            <span class="wb-filter-accordion-toggle"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="wb-filter-accordion-content">
+                            <label class="wb-filter-item">
+                                <input type="checkbox" 
+                                       class="wb-filter-checkbox sale-filter" 
+                                       name="sale"
+                                       data-filter="sale" 
+                                       value="true" 
+                                       id="sale-filter"
+                                       {% if request.GET.sale == 'true' or request.GET.sale == '1' %}checked{% endif %}>
+                                <span class="wb-filter-label">Только распродажа</span>
+                            </label>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            
+            <!-- Список товаров -->
+            <div class="col-lg-9">
+                <!-- Индикатор загрузки -->
+                <div id="loading-indicator" class="text-center py-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Загрузка...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Загрузка товаров...</p>
+                </div>
+                
+                <div class="row align-items-center rows-products" id="products-list">
+                    {% include 'partials/_category_products.html' %}
+                </div>
+                
+                <!-- Контейнер для пагинации (обновляется через AJAX) -->
+                <div id="pagination-container">
+                    {% include 'partials/_category_pagination.html' %}
+                </div>
 				</div>				
 			</div>
 		</div>
 	</section>
+
+<!-- JavaScript для AJAX фильтрации без перезагрузки страницы -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('category-filters-form');
+    const searchForm = document.getElementById('category-search-form');
+    const categoryId = {{ category.id }};
+    
+    if (!filterForm) return;
+    
+    // Делаем функции доступными глобально для мобильной версии
+    window.categoryId = categoryId;
+    
+    // Переменные для отслеживания
+    let submitTimeout;
+    let isSubmitting = false;
+    let currentRequest = null;
+    
+    // Функция для получения параметров формы
+    function getFormParams(form) {
+        const params = new URLSearchParams();
+        
+        // Обрабатываем множественные значения (чекбоксы)
+        const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked');
+        checkboxes.forEach(function(checkbox) {
+            const name = checkbox.name;
+            if (name.endsWith('[]')) {
+                const baseName = name.slice(0, -2);
+                params.append(baseName, checkbox.value);
+            } else {
+                params.append(name, checkbox.value);
+            }
+        });
+        
+        // Обрабатываем обычные поля (input, select) - исключая чекбоксы
+        const inputs = form.querySelectorAll('input[type="text"], input[type="number"], select');
+        inputs.forEach(function(input) {
+            if (input.type === 'checkbox' || input.type === 'radio') return;
+            const name = input.name;
+            const value = input.value.trim();
+            if (value && name && name !== 'q') { // q обрабатывается отдельно в поиске
+                params.set(name, value);
+            }
+        });
+        
+        // Добавляем сортировку из формы поиска, если есть
+        const searchForm = document.getElementById('category-search-form');
+        if (searchForm) {
+            const sortSelect = searchForm.querySelector('select[name="sort"]');
+            if (sortSelect && sortSelect.value) {
+                params.set('sort', sortSelect.value);
+            }
+            
+            // Добавляем поиск из формы поиска, если есть
+            const searchInput = searchForm.querySelector('input[name="q"]');
+            if (searchInput && searchInput.value.trim()) {
+                params.set('q', searchInput.value.trim());
+            }
+        }
+        
+        return params;
+    }
+    
+    // Делаем функцию доступной глобально для мобильной версии
+    window.getFormParams = getFormParams;
+    
+    // Функция для AJAX запроса
+    function loadProducts(params, page = 1) {
+        if (isSubmitting) return;
+        
+        // Отменяем предыдущий запрос, если он еще выполняется
+        if (currentRequest && currentRequest.abort) {
+            currentRequest.abort();
+        }
+        
+        isSubmitting = true;
+        
+        // Показываем индикатор загрузки
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const productsList = document.getElementById('products-list');
+        if (loadingIndicator) loadingIndicator.style.display = 'block';
+        if (productsList) productsList.style.opacity = '0.5';
+        
+        // Добавляем страницу в параметры
+        if (page > 1) {
+            params.set('page', page);
+        } else {
+            params.delete('page');
+        }
+        
+        // Создаем URL для запроса
+        const url = `/category/${categoryId}/filter/?${params.toString()}`;
+        
+        // Выполняем AJAX запрос (оптимизировано для мобильных)
+        const isMobile = window.innerWidth <= 991;
+        
+        // Проверяем кэш для мобильных устройств
+        if (isMobile && window.ajaxCache) {
+            const cached = window.ajaxCache.get(url);
+            if (cached && Date.now() - cached.timestamp < 30000) {
+                // Используем кэшированные данные
+                handleAjaxResponse(cached.data);
+                return;
+            }
+        }
+        
+        // Функция для обработки ответа (оптимизирована)
+        function handleAjaxResponse(data) {
+            if (data.success) {
+                // Обновляем товары
+                if (productsList) {
+                    productsList.innerHTML = data.products_html;
+                    productsList.style.opacity = '1';
+                }
+                
+                // Обновляем теги фильтров (вверху страницы)
+                const filtersContainerTop = document.getElementById('active-filters-container-top');
+                if (filtersContainerTop) {
+                    filtersContainerTop.innerHTML = data.filters_html || '';
+                    attachFilterTagHandlers();
+                }
+                
+                // Обновляем пагинацию
+                const paginationContainer = document.getElementById('pagination-container');
+                if (paginationContainer) {
+                    paginationContainer.innerHTML = data.pagination_html || '';
+                    attachPaginationHandlers();
+                }
+                
+                // Обновляем счетчик товаров
+                const productCount = document.getElementById('product-count');
+                if (productCount) {
+                    productCount.textContent = data.product_count || 0;
+                }
+                
+                // Обновляем URL в браузере без перезагрузки
+                if (data.update_url) {
+                    window.history.pushState({}, '', data.update_url);
+                }
+                
+                // Прокручиваем к началу списка товаров (только на desktop)
+                if (productsList && !isMobile) {
+                    productsList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            } else {
+                console.error('Ошибка при загрузке товаров:', data.error);
+                alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+            }
+            
+            isSubmitting = false;
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+            if (productsList) productsList.style.opacity = '1';
+            currentRequest = null;
+        }
+        
+        // Используем XMLHttpRequest для лучшей совместимости
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                try {
+                    const data = JSON.parse(xhr.responseText);
+                    
+                    // Кэшируем результат для мобильных устройств
+                    if (isMobile) {
+                        if (!window.ajaxCache) {
+                            window.ajaxCache = new Map();
+                        }
+                        window.ajaxCache.set(url, {
+                            data: data,
+                            timestamp: Date.now()
+                        });
+                        // Очищаем старые записи (оставляем только последние 5)
+                        if (window.ajaxCache.size > 5) {
+                            const firstKey = window.ajaxCache.keys().next().value;
+                            window.ajaxCache.delete(firstKey);
+                        }
+                    }
+                    
+                    handleAjaxResponse(data);
+                } catch (e) {
+                    console.error('Ошибка парсинга JSON:', e);
+                    alert('Ошибка при обработке ответа сервера');
+                    isSubmitting = false;
+                    if (loadingIndicator) loadingIndicator.style.display = 'none';
+                    if (productsList) productsList.style.opacity = '1';
+                    currentRequest = null;
+                }
+            } else {
+                console.error('Ошибка HTTP:', xhr.status);
+                alert('Ошибка при загрузке товаров. Код: ' + xhr.status);
+                isSubmitting = false;
+                if (loadingIndicator) loadingIndicator.style.display = 'none';
+                if (productsList) productsList.style.opacity = '1';
+                currentRequest = null;
+            }
+        };
+        
+        xhr.onerror = function() {
+            console.error('Ошибка сети при AJAX запросе');
+            alert('Ошибка сети. Проверьте подключение к интернету.');
+            isSubmitting = false;
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+            if (productsList) productsList.style.opacity = '1';
+            currentRequest = null;
+        };
+        
+        xhr.onabort = function() {
+            console.log('AJAX запрос отменен');
+            isSubmitting = false;
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+            if (productsList) productsList.style.opacity = '1';
+            currentRequest = null;
+        };
+        
+        currentRequest = xhr;
+        xhr.send();
+    }
+    
+    // Делаем функцию доступной глобально для мобильной версии
+    window.loadProducts = loadProducts;
+    
+    // Функция для автоматической загрузки товаров
+    function autoLoadProducts(page = 1) {
+        if (isSubmitting) return;
+        
+        clearTimeout(submitTimeout);
+        submitTimeout = setTimeout(function() {
+            const params = getFormParams(filterForm);
+            loadProducts(params, page);
+        }, 200);
+    }
+    
+    // Обработчик для чекбоксов фильтров
+    const checkboxes = filterForm.querySelectorAll('.wb-filter-checkbox');
+    checkboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            autoLoadProducts(1); // Сбрасываем на первую страницу
+        });
+    });
+    
+    // Обработчик для полей цены
+    const priceInputs = filterForm.querySelectorAll('.wb-filter-range');
+    let priceTimeout;
+    priceInputs.forEach(function(input) {
+        input.addEventListener('input', function() {
+            clearTimeout(priceTimeout);
+            priceTimeout = setTimeout(function() {
+                autoLoadProducts(1);
+            }, 800);
+        });
+        
+        input.addEventListener('blur', function() {
+            clearTimeout(priceTimeout);
+            autoLoadProducts(1);
+        });
+    });
+    
+    // Обработчик для сортировки (из формы поиска)
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            autoLoadProducts(1);
+        });
+    }
+    
+    // Обработчик для поиска
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const searchInput = searchForm.querySelector('input[name="q"]');
+            const searchValue = searchInput ? searchInput.value.trim() : '';
+            
+            const params = getFormParams(filterForm);
+            if (searchValue) {
+                params.set('q', searchValue);
+            } else {
+                params.delete('q');
+            }
+            
+            loadProducts(params, 1);
+        });
+    }
+    
+    // Обработчики для тегов фильтров (удаление фильтра)
+    function attachFilterTagHandlers() {
+        const removeButtons = document.querySelectorAll('.remove-filter-tag');
+        removeButtons.forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Используем URL из href атрибута (новый формат с remove_url)
+                const removeUrl = this.getAttribute('href');
+                if (removeUrl && removeUrl.startsWith('/')) {
+                    // Парсим URL и извлекаем параметры для AJAX запроса
+                    try {
+                        const urlObj = new URL(removeUrl, window.location.origin);
+                        const params = new URLSearchParams(urlObj.search);
+                        
+                        // Обновляем форму фильтров в соответствии с новыми параметрами
+                        // Снимаем все чекбоксы
+                        filterForm.querySelectorAll('input[type="checkbox"]').forEach(function(cb) {
+                            const name = cb.name.replace('[]', '');
+                            const value = cb.value;
+                            if (params.has(name) && params.getAll(name).includes(value)) {
+                                cb.checked = true;
+                            } else {
+                                cb.checked = false;
+                            }
+                        });
+                        
+                        // Обновляем поля цены
+                        const priceMinInput = filterForm.querySelector('input[name="price_min"]');
+                        const priceMaxInput = filterForm.querySelector('input[name="price_max"]');
+                        if (priceMinInput) priceMinInput.value = params.get('price_min') || '';
+                        if (priceMaxInput) priceMaxInput.value = params.get('price_max') || '';
+                        
+                        // Обновляем поиск
+                        if (searchForm) {
+                            const searchInput = searchForm.querySelector('input[name="q"]');
+                            if (searchInput) searchInput.value = params.get('q') || '';
+                        }
+                        
+                        // Загружаем товары через AJAX
+                        loadProducts(params, 1);
+                    } catch (err) {
+                        console.error('Error parsing remove URL:', err);
+                        // Fallback: перезагружаем страницу
+                        window.location.href = removeUrl;
+                    }
+                }
+            });
+        });
+        
+        // Обработчик для кнопки "Сбросить все"
+        const clearAllBtn = document.querySelector('.clear-all-filters');
+        if (clearAllBtn) {
+            clearAllBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Снимаем все чекбоксы
+                filterForm.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                filterForm.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => input.value = '');
+                const params = new URLSearchParams();
+                loadProducts(params, 1);
+            });
+        }
+    }
+    
+    // Обработчики для пагинации
+    function attachPaginationHandlers() {
+        const paginationLinks = document.querySelectorAll('.pagination-link');
+        paginationLinks.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = parseInt(this.getAttribute('data-page')) || 1;
+                const params = getFormParams(filterForm);
+                loadProducts(params, page);
+            });
+        });
+    }
+    
+    // Инициализация обработчиков
+    attachFilterTagHandlers();
+    attachPaginationHandlers();
+    
+    // Обработка кнопок "Назад/Вперед" браузера
+    window.addEventListener('popstate', function(e) {
+        const params = new URLSearchParams(window.location.search);
+        const page = parseInt(params.get('page')) || 1;
+        params.delete('page');
+        loadProducts(params, page);
+    });
+    
+    // Аккордеон для фильтров
+    const accordionHeaders = document.querySelectorAll('.wb-filter-accordion-header');
+    accordionHeaders.forEach(function(header) {
+        header.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const accordion = this.parentElement;
+            const content = accordion.querySelector('.wb-filter-accordion-content');
+            const toggle = this.querySelector('.wb-filter-accordion-toggle i');
+            
+            accordion.classList.toggle('active');
+            if (accordion.classList.contains('active')) {
+                content.style.display = 'block';
+                if (toggle) {
+                    toggle.classList.remove('fa-chevron-up');
+                    toggle.classList.add('fa-chevron-down');
+                }
+            } else {
+                content.style.display = 'none';
+                if (toggle) {
+                    toggle.classList.remove('fa-chevron-down');
+                    toggle.classList.add('fa-chevron-up');
+                }
+            }
+        });
+    });
+});
+</script>
 
 {% endblock content %}

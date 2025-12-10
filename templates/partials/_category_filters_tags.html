@@ -1,0 +1,28 @@
+{% if active_filters %}
+<div class="wb-active-filters mb-3">
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+        {% if active_filters|length > 0 %}
+        <span class="text-muted small me-2">Выбранные фильтры:</span>
+        {% endif %}
+        {% for filter in active_filters %}
+        <span class="badge bg-primary d-flex align-items-center gap-2" 
+              style="font-size: 0.9rem; padding: 0.4rem 0.8rem; font-weight: 500; border-radius: 20px;">
+            <span class="filter-label-text">{{ filter.name }}: {{ filter.value }}</span>
+            <a href="{{ filter.remove_url }}" 
+               class="text-white text-decoration-none remove-filter-tag ms-1" 
+               style="cursor: pointer; opacity: 0.9;"
+               title="Удалить фильтр">
+                <i class="fas fa-times" style="font-size: 0.85rem;"></i>
+            </a>
+        </span>
+        {% endfor %}
+        {% if active_filters|length > 0 %}
+        <a href="{% url 'store:category' category.id %}" 
+           class="btn btn-sm btn-outline-secondary clear-all-filters ms-2">
+            <i class="fas fa-times-circle"></i> Сбросить все
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+

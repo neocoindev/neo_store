@@ -32,6 +32,18 @@
     z-index: 90;
 }
 
+/* Показывать мобильную панель фильтров на мобильных устройствах */
+@media (max-width: 991px) {
+    .wb-mobile-filter-bar {
+        display: block !important;
+    }
+    
+    /* Скрыть десктопную боковую панель фильтров на мобильных */
+    .wb-filters-sidebar {
+        display: none !important;
+    }
+}
+
 .wb-filter-scroll {
     display: flex;
     gap: 10px;
@@ -509,6 +521,28 @@
 
 /* ========== АКТИВНЫЕ ФИЛЬТРЫ (ЧИПСЫ) ========== */
 .wb-active-filters {
+    padding: 0.75rem 0;
+}
+
+.wb-active-filters .badge {
+    border-radius: 20px;
+    transition: all 0.2s ease;
+}
+
+.wb-active-filters .badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.wb-active-filters .filter-label-text {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.wb-active-filters .remove-filter-tag:hover {
+    opacity: 1 !important;
+    transform: scale(1.1);
+}
     display: flex;
     flex-wrap: wrap;
     gap: 8px;

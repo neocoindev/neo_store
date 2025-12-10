@@ -75,6 +75,10 @@ class Product(models.Model):
 
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, db_index=True)
     brand = models.CharField(max_length=100, null=True, blank=True, verbose_name="Бренд", db_index=True)
+    season = models.CharField(max_length=50, null=True, blank=True, verbose_name="Сезон", db_index=True,
+                              help_text="Например: Зима, Лето, Демисезон")
+    material = models.CharField(max_length=100, null=True, blank=True, verbose_name="Материал", db_index=True,
+                                help_text="Например: Кожа, Текстиль, Резина")
 
     price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, null=True, blank=True,
                                 verbose_name="Цена продажи", db_index=True)

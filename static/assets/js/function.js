@@ -321,7 +321,7 @@ $(document).ready(function () {
             success: function (response) {
                 button.html("<i class='fas fa-heart text-danger'></i>");
                 console.log(response);
-                if (response.message === "User is not logged in") {
+                if (response.message === "Пользователь не авторизован") {
                     button.html("<i class='fas fa-heart text-gray'></i>");
 
                     Toast.fire({

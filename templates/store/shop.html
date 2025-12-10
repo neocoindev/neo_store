@@ -18,41 +18,59 @@
         
         <!-- Секция поиска и фильтров -->
         <div class="wb-filters-section mb-4">
-            <div class="mb-3 d-flex justify-content-between align-items-center gap-2">
-                <input 
-                    type="text" 
-                    class="form-control rounded search-filter" 
-                    placeholder="Поиск товаров..." 
-                    name="search-filter" 
-                    value="{{ request.GET.q }}"
-                />
-                <button class="btn bg-primary text-white rounded">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
+            <form method="GET" action="{% url 'store:shop' %}" id="shop-search-form">
+                <div class="mb-3 d-flex justify-content-between align-items-center gap-2">
+                    <input 
+                        type="text" 
+                        class="form-control rounded search-filter" 
+                        placeholder="Поиск товаров..." 
+                        name="q" 
+                        value="{{ request.GET.q }}"
+                    />
+                    <button type="submit" class="btn bg-primary text-white rounded">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <!-- Скрытые поля для сохранения фильтров при поиске -->
+                {% for key, value_list in request.GET.lists %}
+                    {% if key != 'q' and key != 'page' %}
+                        {% for value in value_list %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </form>
         </div>
         
         <div class="row">
             <!-- Боковая панель фильтров (Desktop) -->
             <div class="col-lg-3 wb-filters-sidebar">
-                <!-- Категории -->
-                <div class="wb-filter-accordion active">
-                    <div class="wb-filter-accordion-header">
-                        <h4>Категории</h4>
-                        <span class="wb-filter-accordion-toggle"><i class="fas fa-chevron-down"></i></span>
+                <form method="GET" action="{% url 'store:shop' %}" id="shop-filters-form">
+                    <!-- Сохраняем поисковый запрос -->
+                    {% if request.GET.q %}
+                        <input type="hidden" name="q" value="{{ request.GET.q }}">
+                    {% endif %}
+                    
+                    <!-- Категории -->
+                    <div class="wb-filter-accordion active">
+                        <div class="wb-filter-accordion-header">
+                            <h4>Категории</h4>
+                            <span class="wb-filter-accordion-toggle"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="wb-filter-accordion-content">
+                            {% for c in categories %}
+                                <label class="wb-filter-item">
+                                    <input type="checkbox" class="wb-filter-checkbox category-filter" 
+                                           name="categories[]" 
+                                           data-filter="categories" data-value="{{c.id}}" 
+                                           value="{{c.id}}" id="category{{c.id}}"
+                                           {% if c.id|stringformat:"s" in selected_categories %}checked{% endif %}>
+                                    <span class="wb-filter-label">{{c.title}}</span>
+                                    <span class="wb-filter-count">({{c.product_count|default:0}})</span>
+                                </label>
+                            {% endfor %}
+                        </div>
                     </div>
-                    <div class="wb-filter-accordion-content">
-                        {% for c in categories %}
-                            <label class="wb-filter-item">
-                                <input type="checkbox" class="wb-filter-checkbox category-filter" 
-                                       data-filter="categories" data-value="{{c.id}}" 
-                                       value="{{c.id}}" id="category{{c.id}}">
-                                <span class="wb-filter-label">{{c.title}}</span>
-                                <span class="wb-filter-count">({{c.product_count|default:0}})</span>
-                            </label>
-                        {% endfor %}
-                    </div>
-                </div>
 
                 <!-- Цена -->
                 <div class="wb-filter-accordion active">
@@ -64,18 +82,23 @@
                         <div class="wb-price-filter">
                             <div class="wb-price-inputs">
                                 <input type="number" id="wb-price-range-min-desktop" class="wb-filter-range" 
+                                       name="min_price"
                                        placeholder="От" min="{{price_range.min_price|default:0}}" 
-                                       max="{{price_range.max_price|default:10000}}">
+                                       max="{{price_range.max_price|default:10000}}"
+                                       value="{{ request.GET.min_price|default:'' }}">
                                 <span>-</span>
                                 <input type="number" id="wb-price-range-max-desktop" class="wb-filter-range" 
+                                       name="max_price"
                                        placeholder="До" min="{{price_range.min_price|default:0}}" 
-                                       max="{{price_range.max_price|default:10000}}">
+                                       max="{{price_range.max_price|default:10000}}"
+                                       value="{{ request.GET.max_price|default:'' }}">
                             </div>
                         </div>
                         {% for p in prices %}
                             <label class="wb-filter-item">
-                                <input type="radio" name="price-filter" class="wb-filter-radio" 
-                                       value="{{p.id}}" id="price{{p.id}}">
+                                <input type="radio" name="prices" class="wb-filter-radio" 
+                                       value="{{p.id}}" id="price{{p.id}}"
+                                       {% if selected_prices == p.id|stringformat:"s" %}checked{% endif %}>
                                 <span class="wb-filter-label">{{p.value}}</span>
                             </label>
                         {% endfor %}
@@ -92,8 +115,10 @@
                         {% for r in ratings %}
                             <label class="wb-filter-item">
                                 <input type="checkbox" class="wb-filter-checkbox rating-filter" 
+                                       name="rating[]"
                                        data-filter="rating" data-value="{{r.id}}" 
-                                       value="{{r.id}}" id="rating{{r.id}}">
+                                       value="{{r.id}}" id="rating{{r.id}}"
+                                       {% if r.id|stringformat:"s" in selected_rating %}checked{% endif %}>
                                 <span class="wb-filter-label">{{r.value}}</span>
                             </label>
                         {% endfor %}
@@ -111,8 +136,10 @@
                             {% for s in sizes %}
                                 <label class="wb-size-item">
                                     <input type="checkbox" class="wb-filter-checkbox size-filter" 
+                                           name="sizes[]"
                                            data-filter="sizes" data-value="{{s.content}}" 
-                                           value="{{s.content}}" id="size{{s.content}}">
+                                           value="{{s.content}}" id="size{{s.content}}"
+                                           {% if s.content in selected_sizes %}checked{% endif %}>
                                     <span class="wb-size-label">{{s.title}}</span>
                                 </label>
                             {% endfor %}
@@ -131,8 +158,10 @@
                             {% for c in colors %}
                                 <label class="wb-color-item" style="background-color: {{c.code|default:c.content}};">
                                     <input type="checkbox" class="wb-filter-checkbox colors-filter" 
+                                           name="colors[]"
                                            data-filter="colors" data-value="{{c.content}}" 
-                                           value="{{c.content}}" id="color{{c.content}}">
+                                           value="{{c.content}}" id="color{{c.content}}"
+                                           {% if c.content in selected_colors %}checked{% endif %}>
                                     <span class="wb-color-name">{{c.title}}</span>
                                 </label>
                             {% endfor %}
@@ -151,8 +180,10 @@
                         {% for brand in brands %}
                             <label class="wb-filter-item">
                                 <input type="checkbox" class="wb-filter-checkbox brand-filter" 
+                                       name="brands[]"
                                        data-filter="brands" data-value="{{brand.brand}}" 
-                                       value="{{brand.brand}}" id="brand{{brand.brand}}">
+                                       value="{{brand.brand}}" id="brand{{brand.brand}}"
+                                       {% if brand.brand in selected_brands %}checked{% endif %}>
                                 <span class="wb-filter-label">{{brand.brand}}</span>
                                 <span class="wb-filter-count">({{brand.count}})</span>
                             </label>
@@ -161,9 +192,15 @@
                 </div>
                 {% endif %}
 
-                <button class="btn bg-primary btn-sm rounded reset_shop_filter_btn w-100 mt-3">
-                    Сбросить фильтр <i class="fas fa-rotate ms-2"></i>
-                </button>
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="submit" class="btn bg-primary btn-sm rounded flex-fill">
+                            Применить фильтры <i class="fas fa-check ms-2"></i>
+                        </button>
+                        <button type="button" class="btn bg-secondary btn-sm rounded reset_shop_filter_btn flex-fill">
+                            Сбросить <i class="fas fa-rotate ms-2"></i>
+                        </button>
+                    </div>
+                </form>
             </div>
             
             <!-- Основная область с товарами -->
@@ -175,23 +212,141 @@
                 <div class="wb-products-grid" id="products-list">
                     {% include 'partials/_store.html' with products=products %}
                 </div>
+                
+                <!-- Пагинация -->
+                {% if products.has_other_pages %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center" id="shop-pagination">
+                        {% if products.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link shop-pagination-link" href="#" data-page="{{ products.previous_page_number }}">Назад</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Назад</span>
+                            </li>
+                        {% endif %}
+
+                        {% for num in products.paginator.page_range %}
+                            {% if products.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link shop-pagination-link" href="#" data-page="{{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if products.has_next %}
+                            <li class="page-item">
+                                <a class="page-link shop-pagination-link" href="#" data-page="{{ products.next_page_number }}">Вперед</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Вперед</span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
             </div>
         </div>
     </div>
 </section>
 
 <!-- Подключение JavaScript для улучшенной фильтрации -->
-<script src="{% static 'assets/js/shop.js' %}"></script>
-<script src="{% static 'assets/js/filters.js' %}"></script>
-<script src="{% static 'assets/js/image-preloader.js' %}"></script>
-
+<!-- Убеждаемся, что jQuery загружен перед использованием -->
 <script>
-// Инициализация аккордеонов для десктопной версии
-$(document).ready(function() {
+// Проверяем наличие jQuery перед загрузкой зависимых скриптов
+(function() {
+    function loadScripts() {
+        if (typeof jQuery === 'undefined' && typeof $ === 'undefined') {
+            console.warn('jQuery not loaded yet, waiting...');
+            setTimeout(loadScripts, 100);
+            return;
+        }
+        
+        // Загружаем скрипты только после загрузки jQuery
+        const scripts = [
+            '{% static "assets/js/shop.js" %}',
+            '{% static "assets/js/filters.js" %}',
+            '{% static "assets/js/image-preloader.js" %}'
+        ];
+        
+        let loaded = 0;
+        scripts.forEach(function(src) {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = function() {
+                loaded++;
+                if (loaded === scripts.length) {
+                    // Все скрипты загружены, инициализируем
+                    initAccordions();
+                }
+            };
+            script.onerror = function() {
+                console.error('Failed to load script:', src);
+                loaded++;
+                if (loaded === scripts.length) {
+                    initAccordions();
+                }
+            };
+            document.head.appendChild(script);
+        });
+    }
+    
+    function initAccordions() {
+        // Инициализация аккордеонов для десктопной версии
+        if (typeof jQuery !== 'undefined') {
+            jQuery(document).ready(function($) {
     $('.wb-filter-accordion-header').on('click', function() {
         $(this).parent().toggleClass('active');
     });
-});
+    
+    // Тестовая проверка работы фильтров
+    console.log('Shop page loaded');
+    console.log('jQuery version:', $.fn.jquery);
+    console.log('Products container:', $('#products-list').length);
+    console.log('Mobile filter bar:', $('#wb-mobile-filter-bar').length);
+    console.log('Filter modal:', $('#wb-filter-modal').length);
+    
+    // Проверка через небольшую задержку
+    setTimeout(function() {
+        console.log('After delay - Mobile filter bar:', $('#wb-mobile-filter-bar').length);
+        console.log('After delay - Filter buttons:', $('.wb-filter-chip-btn').length);
+        
+        // Тестовый клик на первую кнопку фильтра
+        if ($('.wb-filter-chip-btn').length > 0) {
+            console.log('Filter buttons found, testing click...');
+            $('.wb-filter-chip-btn').first().on('click', function() {
+                console.log('Direct click handler works!');
+            });
+        }
+    }, 1000);
+    
+    // Обработка пагинации с сохранением фильтров
+    $(document).on('click', '.shop-pagination-link', function(e) {
+        e.preventDefault();
+        var page = $(this).data('page');
+        var url = new URL(window.location.href);
+        url.searchParams.set('page', page);
+        window.location.href = url.toString();
+    });
+            });
+        } else {
+            console.error('jQuery is not available for accordion initialization');
+        }
+    }
+    
+    // Запускаем загрузку скриптов
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadScripts);
+    } else {
+        loadScripts();
+    }
+})();
 </script>
 
 {% endblock content %}

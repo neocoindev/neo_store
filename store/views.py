@@ -50,8 +50,113 @@ def index(request):
     return render(request, "store/index.html", context)
 
 def shop(request):
+    from decimal import Decimal
+    from django.db.models import Avg
     
-    products_list = store_models.Product.objects.filter(status="Published")
+    # Начинаем с базового queryset только опубликованных товаров
+    products_list = store_models.Product.objects.filter(status="Published").select_related('category', 'vendor').prefetch_related('reviews', 'product_variants')
+    
+    # ========== ПРИМЕНЕНИЕ ФИЛЬТРОВ ИЗ GET ПАРАМЕТРОВ ==========
+    
+    # Поиск
+    query = request.GET.get("q") or request.GET.get("searchFilter")
+    if query:
+        products_list = products_list.filter(
+            Q(name__icontains=query) |
+            Q(description__icontains=query) |
+            Q(brand__icontains=query) |
+            Q(category__title__icontains=query)
+        )
+    
+    # Фильтр по категориям
+    categories_filter = request.GET.getlist('categories[]') or request.GET.getlist('categories')
+    if categories_filter:
+        try:
+            category_ids = [int(cat_id) for cat_id in categories_filter if cat_id and str(cat_id).isdigit()]
+            if category_ids:
+                products_list = products_list.filter(category__id__in=category_ids)
+        except (ValueError, TypeError):
+            pass
+    
+    # Фильтр по рейтингу
+    rating_filter = request.GET.getlist('rating[]') or request.GET.getlist('rating')
+    if rating_filter:
+        rating_values = [int(r) for r in rating_filter if r.isdigit()]
+        if rating_values:
+            rating_conditions = Q()
+            for r_val in rating_values:
+                rating_conditions |= Q(reviews__rating__gte=r_val)
+            products_list = products_list.filter(rating_conditions).distinct()
+    
+    # Фильтр по размерам
+    sizes_filter = request.GET.getlist('sizes[]') or request.GET.getlist('sizes')
+    if sizes_filter:
+        size_filter = Q()
+        size_filter |= Q(product_variants__size__in=sizes_filter, product_variants__is_available=True)
+        products_list = products_list.filter(size_filter).distinct()
+    
+    # Фильтр по цветам
+    colors_filter = request.GET.getlist('colors[]') or request.GET.getlist('colors')
+    if colors_filter:
+        color_filter = Q()
+        color_filter |= Q(product_variants__color__in=colors_filter, product_variants__is_available=True)
+        products_list = products_list.filter(color_filter).distinct()
+    
+    # Фильтр по брендам
+    brands_filter = request.GET.getlist('brands[]') or request.GET.getlist('brands')
+    if brands_filter:
+        products_list = products_list.filter(brand__in=brands_filter).distinct()
+    
+    # Фильтр по наличию
+    in_stock = request.GET.get('in_stock')
+    if in_stock == 'true':
+        products_list = products_list.filter(in_stock=True)
+    elif in_stock == 'false':
+        products_list = products_list.filter(in_stock=False)
+    
+    # Фильтр по новинкам
+    is_new = request.GET.get('is_new')
+    if is_new == 'true':
+        products_list = products_list.filter(is_new=True)
+    
+    # Фильтр по скидкам
+    has_discount = request.GET.get('has_discount')
+    if has_discount == 'true':
+        products_list = products_list.filter(regular_price__gt=F('price'))
+    
+    # Фильтр по диапазону цен
+    min_price = request.GET.get('min_price')
+    if min_price:
+        try:
+            min_price_decimal = Decimal(min_price)
+            products_list = products_list.filter(price__gte=min_price_decimal)
+        except (ValueError, TypeError):
+            pass
+    
+    max_price = request.GET.get('max_price')
+    if max_price:
+        try:
+            max_price_decimal = Decimal(max_price)
+            products_list = products_list.filter(price__lte=max_price_decimal)
+        except (ValueError, TypeError):
+            pass
+    
+    # Сортировка
+    price_order = request.GET.get('prices')
+    if price_order == 'lowest':
+        products_list = products_list.order_by('-price')
+    elif price_order == 'highest':
+        products_list = products_list.order_by('price')
+    elif price_order == 'rating':
+        products_list = products_list.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating', '-date')
+    elif price_order == 'popular':
+        products_list = products_list.annotate(review_count=Count('reviews')).order_by('-review_count', '-date')
+    else:
+        products_list = products_list.order_by('-date', '-id')
+    
+    # ========== ПОДГОТОВКА ДАННЫХ ДЛЯ ШАБЛОНА ==========
+    
+    # Получаем категории с количеством товаров (с учетом текущих фильтров)
     categories = store_models.Category.objects.annotate(
         product_count=Count('product', filter=Q(product__status='Published'))
     ).order_by('title')
@@ -123,8 +228,9 @@ def shop(request):
         count=Count('id')
     ).order_by('brand')
     
-    # Диапазон цен
-    price_range = products_list.aggregate(
+    # Диапазон цен (из всех товаров, не отфильтрованных)
+    all_products = store_models.Product.objects.filter(status="Published")
+    price_range = all_products.aggregate(
         min_price=Min('price'),
         max_price=Max('price')
     )
@@ -151,12 +257,16 @@ def shop(request):
         {"id": "highest", "value": "От низкой к высокой"},
     ]
 
-    # Handle search query from GET parameter
-    query = request.GET.get("q")
-    if query:
-        products_list = products_list.filter(name__icontains=query)
-
+    # Применяем пагинацию
     products = paginate_queryset(request, products_list, 10)
+    
+    # Получаем текущие выбранные фильтры для восстановления состояния в шаблоне
+    selected_categories = request.GET.getlist('categories[]') or request.GET.getlist('categories')
+    selected_rating = request.GET.getlist('rating[]') or request.GET.getlist('rating')
+    selected_sizes = request.GET.getlist('sizes[]') or request.GET.getlist('sizes')
+    selected_colors = request.GET.getlist('colors[]') or request.GET.getlist('colors')
+    selected_brands = request.GET.getlist('brands[]') or request.GET.getlist('brands')
+    selected_prices = request.GET.get('prices', '')
 
     context = {
         "products": products,
@@ -169,25 +279,166 @@ def shop(request):
         'item_display': item_display,
         'ratings': ratings,
         'prices': prices,
+        # Передаем выбранные фильтры для восстановления состояния
+        'selected_categories': [str(c) for c in selected_categories],
+        'selected_rating': [str(r) for r in selected_rating],
+        'selected_sizes': selected_sizes,
+        'selected_colors': selected_colors,
+        'selected_brands': selected_brands,
+        'selected_prices': selected_prices,
     }
     return render(request, "store/shop.html", context)
 
 def category(request, id):
-    category = store_models.Category.objects.get(id=id)
-    products_list = store_models.Product.objects.filter(status="Published", category=category)
-
-    query = request.GET.get("q")
-    if query:
-        products_list = products_list.filter(name__icontains=query)
-
-    products = paginate_queryset(request, products_list, 10)
-
+    """
+    Страница категории с фильтрацией в стиле Wildberries
+    Полностью переписанная логика с корректной обработкой всех фильтров
+    """
+    from store.utils import build_product_filters, get_filter_options
+    from plugin.paginate_queryset import paginate_queryset as paginate_qs
+    
+    # Получаем категорию
+    try:
+        category = store_models.Category.objects.get(id=id)
+    except store_models.Category.DoesNotExist:
+        messages.error(request, "Категория не найдена")
+        return redirect('store:index')
+    
+    # Базовый queryset - только опубликованные товары (оптимизированный)
+    base_queryset = store_models.Product.objects.filter(
+        status="Published"
+    ).select_related('category', 'vendor').prefetch_related(
+        'reviews', 
+        'product_variants'
+    )
+    
+    # Получаем опции для фильтров ДО применения фильтров (чтобы показать все доступные опции)
+    filter_options = get_filter_options(base_queryset, category=category)
+    
+    # Применяем фильтры
+    products_list, selected_filters = build_product_filters(request, base_queryset, category=category)
+    
+    # Пагинация
+    products = paginate_qs(request, products_list, 12)
+    
+    # Получаем текущие GET параметры для сохранения состояния
+    current_params = request.GET.copy()
+    
+    # Подготавливаем данные для отображения выбранных фильтров (теги)
+    from store.utils import build_active_filters
+    active_filters = build_active_filters(request, selected_filters, category.id)
+    
+    # Сортировка
+    sort_options = [
+        {'value': 'popularity', 'label': 'Популярность'},
+        {'value': 'price_asc', 'label': 'Сначала дешевые'},
+        {'value': 'price_desc', 'label': 'Сначала дорогие'},
+        {'value': 'rating', 'label': 'По рейтингу'},
+    ]
+    
     context = {
         "products": products,
         "products_list": products_list,
         "category": category,
+        "filter_options": filter_options,
+        "selected_filters": selected_filters,
+        "active_filters": active_filters,
+        "current_params": current_params,
+        "sort_options": sort_options,
+        "current_sort": selected_filters.get('sort', 'popularity'),
     }
     return render(request, "store/category.html", context)
+
+
+@csrf_exempt
+def category_filter_ajax(request, id):
+    """
+    AJAX endpoint для фильтрации товаров категории без перезагрузки страницы
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    from store.utils import build_product_filters, get_filter_options
+    from plugin.paginate_queryset import paginate_queryset as paginate_qs
+    from django.template.loader import render_to_string
+    
+    logger.info(f'AJAX filter request for category {id}, GET params: {dict(request.GET)}')
+    
+    # Получаем категорию
+    try:
+        category = store_models.Category.objects.get(id=id)
+    except store_models.Category.DoesNotExist:
+        logger.error(f'Category {id} not found')
+        return JsonResponse({'success': False, 'error': 'Категория не найдена'}, status=404)
+    
+    # Базовый queryset - только опубликованные товары (оптимизированный)
+    base_queryset = store_models.Product.objects.filter(
+        status="Published"
+    ).select_related('category', 'vendor').prefetch_related(
+        'reviews', 
+        'product_variants'
+    )
+    
+    # Применяем фильтры
+    products_list, selected_filters = build_product_filters(request, base_queryset, category=category)
+    
+    # Пагинация
+    products = paginate_qs(request, products_list, 12)
+    
+    # Рендерим HTML для товаров
+    products_html = render_to_string('partials/_category_products.html', {
+        'products': products,
+        'category': category,
+    }, request=request)
+    
+    # Рендерим HTML для тегов фильтров
+    from store.utils import build_active_filters
+    active_filters = build_active_filters(request, selected_filters, category.id)
+    
+    # Рендерим HTML для тегов фильтров
+    filters_html = ''
+    if active_filters:
+        filters_html = render_to_string('partials/_category_filters_tags.html', {
+            'active_filters': active_filters,
+            'category': category,
+            'current_params': request.GET.copy(),
+        }, request=request)
+    
+    # Рендерим HTML для пагинации
+    pagination_html = ''
+    if products.has_other_pages():
+        pagination_html = render_to_string('partials/_category_pagination.html', {
+            'products': products,
+            'current_params': request.GET.copy(),
+        }, request=request)
+    
+    # Формируем URL для обновления истории браузера
+    params = request.GET.copy()
+    if 'page' in params:
+        params.pop('page')
+    url_params = params.urlencode()
+    update_url = f"/category/{id}/"
+    if url_params:
+        update_url += f"?{url_params}"
+    
+    response_data = {
+        'success': True,
+        'products_html': products_html,
+        'filters_html': filters_html,
+        'pagination_html': pagination_html,
+        'product_count': products_list.count(),
+        'update_url': update_url,
+        'page': products.number if hasattr(products, 'number') else 1,
+        'has_next': products.has_next() if hasattr(products, 'has_next') else False,
+        'has_previous': products.has_previous() if hasattr(products, 'has_previous') else False,
+    }
+    
+    # Логирование для отладки
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f'AJAX filter response: {products_list.count()} products found for category {id}')
+    
+    return JsonResponse(response_data)
 
 def vendors(request):
     vendors = userauths_models.Profile.objects.filter(user_type="Vendor")
@@ -222,20 +473,20 @@ def add_to_cart(request):
 
     # Validate required fields
     if not id or not qty or not cart_id:
-        return JsonResponse({"error": "No color or size selected"}, status=400)
+        return JsonResponse({"error": "Не выбраны цвет или размер"}, status=400)
 
     # Try to fetch the product, return an error if it doesn't exist
     try:
         product = store_models.Product.objects.get(status="Published", id=id)
     except store_models.Product.DoesNotExist:
-        return JsonResponse({"error": "Product not found"}, status=404)
+        return JsonResponse({"error": "Товар не найден"}, status=404)
 
     # Check if the item is already in the cart
     existing_cart_item = store_models.Cart.objects.filter(cart_id=cart_id, product=product).first()
 
     # Check if quantity that user is adding exceed item stock qty
     if int(qty) > product.stock:
-        return JsonResponse({"error": "Qty exceed current stock amount"}, status=404)
+        return JsonResponse({"error": "Количество превышает доступный остаток"}, status=404)
 
     # If the item is not in the cart, create a new cart entry
     if not existing_cart_item:
@@ -312,12 +563,12 @@ def delete_cart_item(request):
     
     # Validate required fields
     if not id and not item_id and not cart_id:
-        return JsonResponse({"error": "Item or Product id not found"}, status=400)
+        return JsonResponse({"error": "Товар или ID товара не найдены"}, status=400)
 
     try:
         product = store_models.Product.objects.get(status="Published", id=id)
     except store_models.Product.DoesNotExist:
-        return JsonResponse({"error": "Product not found"}, status=404)
+        return JsonResponse({"error": "Товар не найден"}, status=404)
 
     # Check if the item is already in the cart
     item = store_models.Cart.objects.get(product=product, id=item_id)
@@ -704,7 +955,7 @@ def filter_products(request):
     
     # Начинаем с базового queryset только опубликованных товаров
     # Оптимизация: используем select_related для ForeignKey и prefetch_related для обратных связей
-    products = store_models.Product.objects.filter(status="Published").select_related('category', 'vendor').prefetch_related('reviews', 'variant_set__variant_items', 'product_variants')
+    products = store_models.Product.objects.filter(status="Published").select_related('category', 'vendor').prefetch_related('reviews', 'product_variants')
 
     # Получаем фильтры из AJAX запроса
     categories = request.GET.getlist('categories[]')
@@ -742,23 +993,19 @@ def filter_products(request):
                 rating_conditions |= Q(reviews__rating__gte=r_val)
             products = products.filter(rating_conditions).distinct()
 
-    # Применяем фильтр по размерам (используем и Variant, и ProductVariant)
+    # Применяем фильтр по размерам (только через ProductVariant)
     if sizes:
-        size_filter = Q()
-        # Старый способ через Variant
-        size_filter |= Q(variant_set__variant_items__content__in=sizes)
-        # Новый способ через ProductVariant
-        size_filter |= Q(product_variants__size__in=sizes, product_variants__is_available=True)
-        products = products.filter(size_filter).distinct()
+        products = products.filter(
+            product_variants__size__in=sizes, 
+            product_variants__is_available=True
+        ).distinct()
 
-    # Применяем фильтр по цветам (используем и Variant, и ProductVariant)
+    # Применяем фильтр по цветам (только через ProductVariant)
     if colors:
-        color_filter = Q()
-        # Старый способ через Variant
-        color_filter |= Q(variant_set__variant_items__content__in=colors)
-        # Новый способ через ProductVariant
-        color_filter |= Q(product_variants__color__in=colors, product_variants__is_available=True)
-        products = products.filter(color_filter).distinct()
+        products = products.filter(
+            product_variants__color__in=colors, 
+            product_variants__is_available=True
+        ).distinct()
 
     # Применяем фильтр по брендам
     if brands:
@@ -889,15 +1136,15 @@ def get_filter_metadata(request):
                 rating_conditions |= Q(reviews__rating__gte=r_val)
             filtered_products = filtered_products.filter(rating_conditions).distinct()
     if current_sizes:
-        size_filter = Q()
-        size_filter |= Q(variant_set__variant_items__content__in=current_sizes)
-        size_filter |= Q(product_variants__size__in=current_sizes, product_variants__is_available=True)
-        filtered_products = filtered_products.filter(size_filter).distinct()
+        filtered_products = filtered_products.filter(
+            product_variants__size__in=current_sizes, 
+            product_variants__is_available=True
+        ).distinct()
     if current_colors:
-        color_filter = Q()
-        color_filter |= Q(variant_set__variant_items__content__in=current_colors)
-        color_filter |= Q(product_variants__color__in=current_colors, product_variants__is_available=True)
-        filtered_products = filtered_products.filter(color_filter).distinct()
+        filtered_products = filtered_products.filter(
+            product_variants__color__in=current_colors, 
+            product_variants__is_available=True
+        ).distinct()
     if min_price:
         try:
             filtered_products = filtered_products.filter(price__gte=Decimal(min_price))
@@ -971,8 +1218,8 @@ def get_filter_metadata(request):
         size_name = size_item['content']
         if size_name:
             count = filtered_products.filter(
-                Q(variant_set__variant_items__content=size_name) |
-                Q(product_variants__size=size_name, product_variants__is_available=True)
+                product_variants__size=size_name, 
+                product_variants__is_available=True
             ).distinct().count()
             sizes_data[size_name] = count
     
@@ -984,8 +1231,8 @@ def get_filter_metadata(request):
         size_name = pv_size['size']
         if size_name and size_name not in sizes_data:
             count = filtered_products.filter(
-                Q(variant_set__variant_items__content=size_name) |
-                Q(product_variants__size=size_name, product_variants__is_available=True)
+                product_variants__size=size_name, 
+                product_variants__is_available=True
             ).distinct().count()
             sizes_data[size_name] = count
     
@@ -1005,8 +1252,8 @@ def get_filter_metadata(request):
         color_name = color_item['content'] or color_item['title']
         if color_name:
             count = filtered_products.filter(
-                Q(variant_set__variant_items__content=color_name) |
-                Q(product_variants__color=color_name, product_variants__is_available=True)
+                product_variants__color=color_name, 
+                product_variants__is_available=True
             ).distinct().count()
             colors_data[color_name] = {
                 'count': count,
@@ -1021,8 +1268,8 @@ def get_filter_metadata(request):
         color_name = pv_color['color']
         if color_name and color_name not in colors_data:
             count = filtered_products.filter(
-                Q(variant_set__variant_items__content=color_name) |
-                Q(product_variants__color=color_name, product_variants__is_available=True)
+                product_variants__color=color_name, 
+                product_variants__is_available=True
             ).distinct().count()
             colors_data[color_name] = {
                 'count': count,
