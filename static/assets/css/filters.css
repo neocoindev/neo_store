@@ -1,0 +1,653 @@
+/**
+ * ============================================
+ * WILDBERRIES-STYLE FILTERS CSS
+ * Стили для мобильной и десктопной системы фильтрации
+ * ============================================
+ */
+
+:root {
+    --wb-primary: #007bff;
+    --wb-secondary: #6c757d;
+    --wb-success: #28a745;
+    --wb-danger: #dc3545;
+    --wb-warning: #ffc107;
+    --wb-info: #17a2b8;
+    --wb-light: #f8f9fa;
+    --wb-dark: #343a40;
+    --wb-border-radius: 12px;
+    --wb-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    --wb-shadow-lg: 0 4px 16px rgba(0,0,0,0.15);
+    --wb-transition: all 0.3s ease;
+}
+
+/* ========== МОБИЛЬНАЯ ПАНЕЛЬ ФИЛЬТРОВ ========== */
+.wb-mobile-filter-bar {
+    display: none;
+    background: #fff;
+    padding: 12px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.wb-filter-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 0 15px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+.wb-filter-scroll::-webkit-scrollbar {
+    height: 4px;
+}
+
+.wb-filter-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.wb-filter-scroll::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 2px;
+}
+
+.wb-filter-chip-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: var(--wb-transition);
+    flex-shrink: 0;
+}
+
+.wb-filter-chip-btn:hover {
+    background: #e9ecef;
+    border-color: var(--wb-primary);
+    color: var(--wb-primary);
+}
+
+.wb-filter-chip-btn.active {
+    background: var(--wb-primary);
+    border-color: var(--wb-primary);
+    color: #fff;
+}
+
+.wb-filter-chip-btn i {
+    font-size: 12px;
+}
+
+/* ========== МОДАЛЬНОЕ ОКНО ФИЛЬТРОВ (BOTTOM SHEET) ========== */
+.wb-filter-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.wb-filter-modal.active {
+    display: block;
+    pointer-events: all;
+}
+
+.wb-filter-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.wb-filter-modal.active .wb-filter-modal-backdrop {
+    opacity: 1;
+}
+
+.wb-filter-modal-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+}
+
+.wb-filter-modal.active .wb-filter-modal-content {
+    transform: translateY(0);
+}
+
+.wb-filter-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 10;
+    border-radius: 20px 20px 0 0;
+}
+
+.wb-filter-modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+}
+
+.wb-filter-modal-close {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: var(--wb-transition);
+    color: #666;
+}
+
+.wb-filter-modal-close:hover {
+    background: #e9ecef;
+    color: #333;
+}
+
+.wb-filter-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.wb-filter-modal-footer {
+    display: flex;
+    gap: 12px;
+    padding: 20px;
+    border-top: 1px solid #e0e0e0;
+    background: #fff;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+}
+
+.wb-filter-reset-btn,
+.wb-filter-apply-btn {
+    flex: 1;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--wb-transition);
+}
+
+.wb-filter-reset-btn {
+    background: #f8f9fa;
+    color: #666;
+}
+
+.wb-filter-reset-btn:hover {
+    background: #e9ecef;
+    color: #333;
+}
+
+.wb-filter-apply-btn {
+    background: var(--wb-primary);
+    color: #fff;
+}
+
+.wb-filter-apply-btn:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+}
+
+/* ========== СЕКЦИИ ФИЛЬТРОВ ========== */
+.wb-filter-section {
+    margin-bottom: 30px;
+}
+
+.wb-filter-section h4 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.wb-filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.wb-filter-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--wb-transition);
+}
+
+.wb-filter-item:hover {
+    background: #f8f9fa;
+}
+
+.wb-filter-checkbox,
+.wb-filter-radio {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--wb-primary);
+}
+
+.wb-filter-label {
+    flex: 1;
+    font-size: 15px;
+    color: #333;
+    cursor: pointer;
+}
+
+.wb-filter-count {
+    font-size: 14px;
+    color: #999;
+}
+
+/* ========== ФИЛЬТР ПО ЦЕНЕ ========== */
+.wb-price-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.wb-price-inputs {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.wb-price-inputs input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: var(--wb-transition);
+}
+
+.wb-price-inputs input:focus {
+    outline: none;
+    border-color: var(--wb-primary);
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+}
+
+.wb-price-slider {
+    position: relative;
+    height: 40px;
+}
+
+.wb-price-slider-input {
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #e0e0e0;
+    border-radius: 2px;
+    outline: none;
+}
+
+.wb-price-slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--wb-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.wb-price-slider-input::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: var(--wb-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* ========== ФИЛЬТР ПО РАЗМЕРАМ ========== */
+.wb-size-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 10px;
+}
+
+.wb-size-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 8px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--wb-transition);
+    position: relative;
+}
+
+.wb-size-item:hover {
+    border-color: var(--wb-primary);
+    background: #f0f7ff;
+}
+
+.wb-size-item.active {
+    border-color: var(--wb-primary);
+    background: #e7f3ff;
+}
+
+.wb-size-item input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.wb-size-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.wb-size-count {
+    font-size: 11px;
+    color: #999;
+}
+
+/* ========== ФИЛЬТР ПО ЦВЕТАМ ========== */
+.wb-color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 12px;
+}
+
+.wb-color-item {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    cursor: pointer;
+    transition: var(--wb-transition);
+    overflow: hidden;
+}
+
+.wb-color-item:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.wb-color-item.active {
+    border-color: var(--wb-primary);
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.3);
+    transform: scale(1.1);
+}
+
+.wb-color-item input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.wb-color-name {
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    right: 0;
+    font-size: 10px;
+    text-align: center;
+    color: #333;
+    background: rgba(255,255,255,0.9);
+    padding: 2px 4px;
+    transition: var(--wb-transition);
+}
+
+.wb-color-item:hover .wb-color-name,
+.wb-color-item.active .wb-color-name {
+    bottom: 0;
+}
+
+/* ========== ДЕСКТОПНАЯ БОКОВАЯ ПАНЕЛЬ ========== */
+.wb-filters-sidebar {
+    background: #fff;
+    border-radius: var(--wb-border-radius);
+    padding: 20px;
+    box-shadow: var(--wb-shadow);
+    margin-bottom: 20px;
+}
+
+.wb-filter-accordion {
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 15px;
+}
+
+.wb-filter-accordion:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.wb-filter-accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+.wb-filter-accordion-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.wb-filter-accordion-toggle {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    transition: var(--wb-transition);
+}
+
+.wb-filter-accordion.active .wb-filter-accordion-toggle {
+    transform: rotate(180deg);
+}
+
+.wb-filter-accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.wb-filter-accordion.active .wb-filter-accordion-content {
+    max-height: 1000px;
+    padding-bottom: 15px;
+}
+
+/* ========== АКТИВНЫЕ ФИЛЬТРЫ (ЧИПСЫ) ========== */
+.wb-active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: var(--wb-border-radius);
+}
+
+.wb-active-filter-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    font-size: 14px;
+    color: #333;
+}
+
+.wb-active-filter-chip .chip-remove {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f0f0;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: var(--wb-transition);
+    color: #666;
+}
+
+.wb-active-filter-chip .chip-remove:hover {
+    background: var(--wb-danger);
+    color: #fff;
+}
+
+/* ========== АДАПТИВНОСТЬ ========== */
+@media (max-width: 991.98px) {
+    .wb-mobile-filter-bar {
+        display: block;
+    }
+    
+    .wb-filters-sidebar {
+        display: none;
+    }
+    
+    body.modal-open {
+        overflow: hidden;
+    }
+}
+
+@media (min-width: 992px) {
+    .wb-mobile-filter-bar {
+        display: none;
+    }
+    
+    .wb-filters-sidebar {
+        display: block;
+    }
+    
+    .wb-filter-modal {
+        display: none !important;
+    }
+}
+
+/* ========== АНИМАЦИИ ========== */
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.wb-filter-modal-content {
+    animation: slideUp 0.3s ease;
+}
+
+.wb-filter-modal-backdrop {
+    animation: fadeIn 0.3s ease;
+}
+
+/* ========== ИНДИКАТОР ЗАГРУЗКИ ========== */
+.wb-filter-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.wb-filter-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--wb-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ========== ПУСТОЕ СОСТОЯНИЕ ========== */
+.wb-filter-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.wb-filter-empty-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.wb-filter-empty-text {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.wb-filter-empty-subtext {
+    font-size: 14px;
+    color: #ccc;
+}
+
+

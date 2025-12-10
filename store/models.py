@@ -73,10 +73,11 @@ class Product(models.Model):
     image = models.FileField(upload_to="images", blank=True, null=True, default="product.jpg")
     description = CKEditor5Field('Text', config_name='extends')
 
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, db_index=True)
+    brand = models.CharField(max_length=100, null=True, blank=True, verbose_name="Бренд", db_index=True)
 
     price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, null=True, blank=True,
-                                verbose_name="Цена продажи")
+                                verbose_name="Цена продажи", db_index=True)
     regular_price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, null=True, blank=True,
                                         verbose_name="Обычная цена")
 
@@ -84,19 +85,27 @@ class Product(models.Model):
     shipping = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, null=True, blank=True,
                                    verbose_name="Стоимость доставки")
 
-    status = models.CharField(choices=STATUS, max_length=50, default="Published")
-    featured = models.BooleanField(default=False, verbose_name="Рекомендовано на маркетплейсе")
+    status = models.CharField(choices=STATUS, max_length=50, default="Published", db_index=True)
+    featured = models.BooleanField(default=False, verbose_name="Рекомендовано на маркетплейсе", db_index=True)
+    is_new = models.BooleanField(default=False, verbose_name="Новинка", db_index=True)
+    in_stock = models.BooleanField(default=True, verbose_name="В наличии", db_index=True)
 
     vendor = models.ForeignKey(user_models.User, on_delete=models.SET_NULL, null=True, blank=True)
 
     sku = ShortUUIDField(unique=True, length=5, max_length=50, prefix="SKU", alphabet="1234567890")
-    slug = models.SlugField(null=True, blank=True)
+    slug = models.SlugField(null=True, blank=True, db_index=True)
 
-    date = models.DateTimeField(default=timezone.now)
+    date = models.DateTimeField(default=timezone.now, db_index=True)
 
     class Meta:
         ordering = ['-id']
         verbose_name_plural = "Продукты"
+        indexes = [
+            models.Index(fields=['status', 'category', 'price']),
+            models.Index(fields=['status', 'featured']),
+            models.Index(fields=['status', 'is_new']),
+            models.Index(fields=['status', 'in_stock']),
+        ]
 
     def __str__(self):
         return self.name
@@ -141,14 +150,59 @@ class Variant(models.Model):
 class VariantItem(models.Model):
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='variant_items')
     title = models.CharField(max_length=1000, verbose_name="Название", null=True, blank=True)
-    content = models.CharField(max_length=1000, verbose_name="Контент", null=True, blank=True)
+    content = models.CharField(max_length=1000, verbose_name="Контент", null=True, blank=True, db_index=True)
 
     class Meta:
         ordering = ['-id']
         verbose_name_plural = "Варианты товара"
+        indexes = [
+            models.Index(fields=['variant', 'content']),
+        ]
 
     def __str__(self):
         return self.variant.name
+
+
+class ProductVariant(models.Model):
+    """
+    Модель для вариантов товаров с размером, цветом и наличием
+    Используется для более структурированного хранения вариантов
+    """
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_variants', db_index=True)
+    size = models.CharField(max_length=50, null=True, blank=True, verbose_name="Размер", db_index=True)
+    color = models.CharField(max_length=100, null=True, blank=True, verbose_name="Цвет", db_index=True)
+    color_code = models.CharField(max_length=7, null=True, blank=True, verbose_name="Код цвета (HEX)", 
+                                  help_text="Например: #FF0000 для красного")
+    stock = models.PositiveIntegerField(default=0, null=True, blank=True, verbose_name="Количество на складе")
+    is_available = models.BooleanField(default=True, verbose_name="Доступен", db_index=True)
+    price_modifier = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, null=True, blank=True,
+                                         verbose_name="Изменение цены", 
+                                         help_text="Дополнительная стоимость для этого варианта")
+    sku = ShortUUIDField(unique=True, length=8, max_length=50, prefix="VAR", alphabet="1234567890")
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-id']
+        verbose_name_plural = "Варианты продуктов"
+        indexes = [
+            models.Index(fields=['product', 'size', 'is_available']),
+            models.Index(fields=['product', 'color', 'is_available']),
+            models.Index(fields=['product', 'is_available']),
+        ]
+
+    def __str__(self):
+        variant_str = f"{self.product.name}"
+        if self.size:
+            variant_str += f" - {self.size}"
+        if self.color:
+            variant_str += f" - {self.color}"
+        return variant_str
+
+    def get_final_price(self):
+        """Возвращает итоговую цену с учетом модификатора"""
+        if self.product.price and self.price_modifier:
+            return self.product.price + self.price_modifier
+        return self.product.price or 0
 
 
 class Gallery(models.Model):

@@ -10,17 +10,33 @@ class VariantInline(admin.TabularInline):
 class VariantItemInline(admin.TabularInline):
     model = store_models.VariantItem
 
+class ProductVariantInline(admin.TabularInline):
+    model = store_models.ProductVariant
+    extra = 1
+    fields = ['size', 'color', 'color_code', 'stock', 'is_available', 'price_modifier']
+
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['title', 'image']
     list_editable = ['image']
     prepopulated_fields = {'slug': ('title',)}
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'price', 'regular_price', 'stock', 'status', 'featured', 'vendor', 'date']
-    search_fields = ['name', 'category__title']
-    list_filter = ['status', 'featured', 'category']
-    inlines = [GalleryInline, VariantInline]
+    list_display = ['name', 'category', 'brand', 'price', 'regular_price', 'stock', 'status', 'featured', 'is_new', 'in_stock', 'vendor', 'date']
+    search_fields = ['name', 'category__title', 'brand']
+    list_filter = ['status', 'featured', 'category', 'is_new', 'in_stock', 'brand']
+    inlines = [GalleryInline, VariantInline, ProductVariantInline]
     prepopulated_fields = {'slug': ('name',)}
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('name', 'slug', 'description', 'category', 'brand', 'image', 'status', 'featured', 'is_new', 'in_stock')
+        }),
+        ('Цены и наличие', {
+            'fields': ('price', 'regular_price', 'stock', 'shipping')
+        }),
+        ('Дополнительно', {
+            'fields': ('vendor', 'sku', 'date')
+        }),
+    )
 
 class VariantAdmin(admin.ModelAdmin):
     list_display = ['product', 'name']
@@ -30,6 +46,16 @@ class VariantAdmin(admin.ModelAdmin):
 class VariantItemAdmin(admin.ModelAdmin):
     list_display = ['variant', 'title', 'content']
     search_fields = ['variant__name', 'title']
+
+class ProductVariantAdmin(admin.ModelAdmin):
+    list_display = ['product', 'size', 'color', 'stock', 'is_available', 'get_final_price']
+    list_filter = ['is_available', 'size', 'color']
+    search_fields = ['product__name', 'size', 'color']
+    list_editable = ['is_available', 'stock']
+    
+    def get_final_price(self, obj):
+        return obj.get_final_price()
+    get_final_price.short_description = 'Итоговая цена'
 
 class GalleryAdmin(admin.ModelAdmin):
     list_display = ['product', 'gallery_id']
@@ -81,6 +107,7 @@ admin.site.register(store_models.Category, CategoryAdmin)
 admin.site.register(store_models.Product, ProductAdmin)
 admin.site.register(store_models.Variant, VariantAdmin)
 admin.site.register(store_models.VariantItem, VariantItemAdmin)
+admin.site.register(store_models.ProductVariant, ProductVariantAdmin)
 admin.site.register(store_models.Gallery, GalleryAdmin)
 admin.site.register(store_models.Cart, CartAdmin)
 admin.site.register(store_models.Coupon, CouponAdmin)

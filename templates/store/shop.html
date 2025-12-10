@@ -7,6 +7,7 @@
 
 <!-- Подключение стилей для улучшенного каталога -->
 <link href="{% static 'assets/css/shop.css' %}" rel="stylesheet" />
+<link href="{% static 'assets/css/filters.css' %}" rel="stylesheet" />
 
 <section class="middle">
     <div class="container">
@@ -32,117 +33,143 @@
         </div>
         
         <div class="row">
-            <!-- Боковая панель фильтров -->
+            <!-- Боковая панель фильтров (Desktop) -->
             <div class="col-lg-3 wb-filters-sidebar">
-					<div class="border rounded p-3 mb-3">
-						<div>
-							<h4>Категории</h4>
-							<div>
-								{% for c in categories %}
-									<div class="mb-1 form-check d-flex justify-content-between align-items-center">
-										<div>
-											<input type="checkbox" class="form-check-input category-filter" value="{{c.id}}" id="category{{c.id}}">
-											<label class="form-check-label fs-6" for="category{{c.id}}">{{c.title}}</label>
-										</div>
-										<div>
-											<p class="mb-0">{{c.products.all.count}}</p>
-										</div>
-									</div>
-								{% endfor %}
-							</div>
-						</div>
-					</div>
+                <!-- Категории -->
+                <div class="wb-filter-accordion active">
+                    <div class="wb-filter-accordion-header">
+                        <h4>Категории</h4>
+                        <span class="wb-filter-accordion-toggle"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="wb-filter-accordion-content">
+                        {% for c in categories %}
+                            <label class="wb-filter-item">
+                                <input type="checkbox" class="wb-filter-checkbox category-filter" 
+                                       data-filter="categories" data-value="{{c.id}}" 
+                                       value="{{c.id}}" id="category{{c.id}}">
+                                <span class="wb-filter-label">{{c.title}}</span>
+                                <span class="wb-filter-count">({{c.product_count|default:0}})</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
 
-					
+                <!-- Цена -->
+                <div class="wb-filter-accordion active">
+                    <div class="wb-filter-accordion-header">
+                        <h4>Цена</h4>
+                        <span class="wb-filter-accordion-toggle"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="wb-filter-accordion-content">
+                        <div class="wb-price-filter">
+                            <div class="wb-price-inputs">
+                                <input type="number" id="wb-price-range-min-desktop" class="wb-filter-range" 
+                                       placeholder="От" min="{{price_range.min_price|default:0}}" 
+                                       max="{{price_range.max_price|default:10000}}">
+                                <span>-</span>
+                                <input type="number" id="wb-price-range-max-desktop" class="wb-filter-range" 
+                                       placeholder="До" min="{{price_range.min_price|default:0}}" 
+                                       max="{{price_range.max_price|default:10000}}">
+                            </div>
+                        </div>
+                        {% for p in prices %}
+                            <label class="wb-filter-item">
+                                <input type="radio" name="price-filter" class="wb-filter-radio" 
+                                       value="{{p.id}}" id="price{{p.id}}">
+                                <span class="wb-filter-label">{{p.value}}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
 
-					<div class="border rounded p-3 mb-3">
-						<div>
-							<h4>Цена</h4>
-							<div  style="margin-left: -18px;">
-								{% for p in prices %}
-									<div class="mb-1 form-check">
-										<input type="radio" name="price-filter" value="{{p.id}}" class="form-check-input " id="{{p.id}}">
-										<label class="form-check-label fs-6" for="{{p.id}}">{{p.value}}</label>
-									</div>
-								{% endfor %}
-							</div>
-						</div>
-					</div>
+                <!-- Рейтинг -->
+                <div class="wb-filter-accordion active">
+                    <div class="wb-filter-accordion-header">
+                        <h4>Рейтинг</h4>
+                        <span class="wb-filter-accordion-toggle"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="wb-filter-accordion-content">
+                        {% for r in ratings %}
+                            <label class="wb-filter-item">
+                                <input type="checkbox" class="wb-filter-checkbox rating-filter" 
+                                       data-filter="rating" data-value="{{r.id}}" 
+                                       value="{{r.id}}" id="rating{{r.id}}">
+                                <span class="wb-filter-label">{{r.value}}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
 
-					<div class="border rounded p-3 mb-3">
-						<div>
-							<h4>Отображение</h4>
-							<div  style="margin-left: -18px;">
-								{% for i in item_display %}
-									<div class="mb-1 form-check">
-										<input type="radio" name="items-display" value="{{i.id}}" class="form-check-input items-display" id="display{{i.id}}">
-										<label class="form-check-label fs-6" for="display{{i.id}}">{{i.value}} Товаров</label>
-									</div>
-								{% endfor %}
-							</div>
-						</div>
-					</div>
+                <!-- Размеры -->
+                <div class="wb-filter-accordion active">
+                    <div class="wb-filter-accordion-header">
+                        <h4>Размер</h4>
+                        <span class="wb-filter-accordion-toggle"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="wb-filter-accordion-content">
+                        <div class="wb-size-grid">
+                            {% for s in sizes %}
+                                <label class="wb-size-item">
+                                    <input type="checkbox" class="wb-filter-checkbox size-filter" 
+                                           data-filter="sizes" data-value="{{s.content}}" 
+                                           value="{{s.content}}" id="size{{s.content}}">
+                                    <span class="wb-size-label">{{s.title}}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
 
-					<div class="border rounded p-3 mb-3">
-						<div>
-							<h4>Рейтинг</h4>
-							<div>
-								
-								{% for r in ratings %}
-									<div class="mb-1 form-check d-flex justify-content-between align-items-center">
-										<div>
-											<input type="checkbox" class="form-check-input rating-filter" value="{{r.id}}" id="rating{{r.id}}">
-											<label class="form-check-label fs-6" for="rating{{r.id}}">{{r.value}}</label>
-										</div>
-									</div>
-								{% endfor %}
-									
-								
-							</div>
-						</div>
-					</div>
+                <!-- Цвета -->
+                <div class="wb-filter-accordion active">
+                    <div class="wb-filter-accordion-header">
+                        <h4>Цвет</h4>
+                        <span class="wb-filter-accordion-toggle"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="wb-filter-accordion-content">
+                        <div class="wb-color-grid">
+                            {% for c in colors %}
+                                <label class="wb-color-item" style="background-color: {{c.code|default:c.content}};">
+                                    <input type="checkbox" class="wb-filter-checkbox colors-filter" 
+                                           data-filter="colors" data-value="{{c.content}}" 
+                                           value="{{c.content}}" id="color{{c.content}}">
+                                    <span class="wb-color-name">{{c.title}}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
 
-					<div class="border rounded p-3 mb-3">
-						<div>
-							<h4>Размеры</h4>
-							<div>
-								
-								{% for s in sizes %}
-									<div class="mb-1 form-check d-flex justify-content-between align-items-center">
-										<div>
-											<input type="checkbox" class="form-check-input size-filter" value="{{s.content}}" id="{{s.content}}">
-											<label class="form-check-label fs-6" for="{{s.content}}">{{s.title}}</label>
-										</div>
-									</div>
-								{% endfor %}
-							</div>
-						</div>
-					</div>
+                <!-- Бренды -->
+                {% if brands %}
+                <div class="wb-filter-accordion active">
+                    <div class="wb-filter-accordion-header">
+                        <h4>Бренд</h4>
+                        <span class="wb-filter-accordion-toggle"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="wb-filter-accordion-content">
+                        {% for brand in brands %}
+                            <label class="wb-filter-item">
+                                <input type="checkbox" class="wb-filter-checkbox brand-filter" 
+                                       data-filter="brands" data-value="{{brand.brand}}" 
+                                       value="{{brand.brand}}" id="brand{{brand.brand}}">
+                                <span class="wb-filter-label">{{brand.brand}}</span>
+                                <span class="wb-filter-count">({{brand.count}})</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
 
-
-					<div class="border rounded p-3 mb-3">
-						<div>
-							<h4>Цвета</h4>
-							<div>
-								{% for c in colors %}
-									<div class="mb-1 form-check d-flex justify-content-between align-items-center">
-										<div class="d-flex align-items-center gap-2">
-											<input type="checkbox" class="form-check-input colors-filter" value="{{c.content}}" id="{{c.content}}" >
-											<label class="form-check-label fs-6 p-3 colors-filter" for="{{c.content}}" style="background-color: {{c.content}}; color: white; border-radius: 50%;"></label>
-										</div>
-									</div>
-								{% endfor %}
-							</div>
-						</div>
-					</div>
-
-                <button class="btn bg-primary btn-sm rounded reset_shop_filter_btn w-100">Сбросить фильтр <i class="fas fa-rotate ms-2"></i></button>
+                <button class="btn bg-primary btn-sm rounded reset_shop_filter_btn w-100 mt-3">
+                    Сбросить фильтр <i class="fas fa-rotate ms-2"></i>
+                </button>
             </div>
             
             <!-- Основная область с товарами -->
             <div class="col-lg-9">
-                <!-- Чипсы выбранных фильтров (будут добавлены через JS) -->
-                <div id="wb-filter-chips" class="wb-filter-chips" style="display: none;"></div>
+                <!-- Активные фильтры (чипсы) -->
+                <div id="wb-active-filters" class="wb-active-filters" style="display: none;"></div>
                 
                 <!-- Сетка товаров (контейнер для AJAX обновлений) -->
                 <div class="wb-products-grid" id="products-list">
@@ -155,5 +182,15 @@
 
 <!-- Подключение JavaScript для улучшенной фильтрации -->
 <script src="{% static 'assets/js/shop.js' %}"></script>
+<script src="{% static 'assets/js/filters.js' %}"></script>
+
+<script>
+// Инициализация аккордеонов для десктопной версии
+$(document).ready(function() {
+    $('.wb-filter-accordion-header').on('click', function() {
+        $(this).parent().toggleClass('active');
+    });
+});
+</script>
 
 {% endblock content %}

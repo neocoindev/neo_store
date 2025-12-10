@@ -215,3 +215,4 @@ products = store_models.Product.objects.filter(status="Published")
 **Версия:** 1.0
 **Автор:** AI Assistant
 
+

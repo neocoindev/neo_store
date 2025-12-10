@@ -865,7 +865,7 @@
             
             <!-- Products Grid: 6 columns desktop, 2 columns mobile -->
             <div class="wb-products-grid">
-                {% for p in products|slice:":12" %}
+                {% for p in products %}
                 <div class="wb-product-card">
                     <a href="{% url 'store:product_detail' p.slug %}" style="text-decoration: none; color: inherit;">
                         <div class="wb-product-image-wrapper">
