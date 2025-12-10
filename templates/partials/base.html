@@ -324,58 +324,9 @@
                 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
                 
                 if (isTouchDevice && window.innerWidth <= 992) {
-                    // Обработка touch событий для dropdown menu
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const navMenuItems = document.querySelectorAll('.nav-menu > li');
-                        
-                        navMenuItems.forEach(function(item) {
-                            const dropdown = item.querySelector('.nav-dropdown');
-                            
-                            if (dropdown) {
-                                let touchTimer;
-                                let isOpen = false;
-                                
-                                // Обработка touchstart
-                                item.addEventListener('touchstart', function(e) {
-                                    e.preventDefault();
-                                    clearTimeout(touchTimer);
-                                    
-                                    // Если dropdown закрыт, открываем его
-                                    if (!isOpen) {
-                                        // Закрываем все другие dropdown
-                                        navMenuItems.forEach(function(otherItem) {
-                                            if (otherItem !== item) {
-                                                const otherDropdown = otherItem.querySelector('.nav-dropdown');
-                                                if (otherDropdown) {
-                                                    otherDropdown.style.display = 'none';
-                                                    otherItem.classList.remove('touch-hover');
-                                                }
-                                            }
-                                        });
-                                        
-                                        // Открываем текущий dropdown
-                                        dropdown.style.display = 'block';
-                                        item.classList.add('touch-hover');
-                                        isOpen = true;
-                                    } else {
-                                        // Если открыт, закрываем
-                                        dropdown.style.display = 'none';
-                                        item.classList.remove('touch-hover');
-                                        isOpen = false;
-                                    }
-                                }, { passive: false });
-                                
-                                // Обработка клика вне элемента для закрытия
-                                document.addEventListener('touchstart', function(e) {
-                                    if (!item.contains(e.target) && !dropdown.contains(e.target)) {
-                                        dropdown.style.display = 'none';
-                                        item.classList.remove('touch-hover');
-                                        isOpen = false;
-                                    }
-                                });
-                            }
-                        });
-                    });
+                    // Обработка touch событий для dropdown menu (отключена - используется основной скрипт navigation)
+                    // Этот код был отключен, так как он блокировал переходы по ссылкам
+                    // Основная логика обработки находится в custom.js
                 }
             })();
         </script>

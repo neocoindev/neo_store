@@ -193,14 +193,52 @@ $(function () {
                             .children("a")
                             .off(l).off(c) // Отключаем hover обработчики
                             .on(f, function (i) {
-                                if ((u.hideSubmenu(n(this).parent("li").siblings("li"), u.settings.effect), n(this).closest(".nav-menu").siblings(".nav-menu").find(".nav-submenu").fadeOut(u.settings.hideDuration), n(this).siblings(".nav-submenu").length > 0)) {
-                                    if ((i.stopPropagation(), i.preventDefault(), "none" == n(this).siblings(".nav-submenu").css("display"))) return u.showSubmenu(n(this).parent("li"), u.settings.effect), C(), !1;
-                                    if ((u.hideSubmenu(n(this).parent("li"), u.settings.effect), "_blank" == n(this).attr("target") || "blank" == n(this).attr("target"))) e.open(n(this).attr("href"));
-                                    else {
-                                        if ("#" == n(this).attr("href") || "" == n(this).attr("href")) return !1;
-                                        e.location.href = n(this).attr("href");
+                                var $link = n(this);
+                                var $parentLi = $link.parent("li");
+                                var $submenu = $link.siblings(".nav-submenu, .nav-dropdown");
+                                var hasSubmenu = $submenu.length > 0;
+                                var linkHref = $link.attr("href");
+                                var isJavascriptLink = linkHref === "javascript:void(0);" || linkHref === "#" || !linkHref || linkHref === "";
+                                
+                                // Проверяем видимость подменю
+                                var isSubmenuVisible = hasSubmenu && ($submenu.css("display") !== "none" && $submenu.is(":visible"));
+                                
+                                // Закрываем другие подменю
+                                u.hideSubmenu($parentLi.siblings("li"), u.settings.effect);
+                                $link.closest(".nav-menu").siblings(".nav-menu").find(".nav-submenu, .nav-dropdown").fadeOut(u.settings.hideDuration);
+                                
+                                // Если есть подменю
+                                if (hasSubmenu) {
+                                    // Если подменю закрыто - открываем его (блокируем переход)
+                                    if (!isSubmenuVisible) {
+                                        i.stopPropagation();
+                                        i.preventDefault();
+                                        u.showSubmenu($parentLi, u.settings.effect);
+                                        C();
+                                        return false;
+                                    }
+                                    // Если подменю открыто:
+                                    // - Если это javascript ссылка - просто закрываем подменю
+                                    // - Если это обычная ссылка - разрешаем переход (не блокируем)
+                                    if (isJavascriptLink) {
+                                        i.stopPropagation();
+                                        i.preventDefault();
+                                        u.hideSubmenu($parentLi, u.settings.effect);
+                                        return false;
+                                    }
+                                    // Для обычных ссылок - закрываем подменю, но разрешаем переход
+                                    u.hideSubmenu($parentLi, u.settings.effect);
+                                    // НЕ вызываем preventDefault - разрешаем переход по ссылке
+                                } else {
+                                    // Если нет подменю - разрешаем переход по ссылке (не вызываем preventDefault)
+                                    // Ссылка работает нормально
+                                    if (isJavascriptLink) {
+                                        i.stopPropagation();
+                                        i.preventDefault();
+                                        return false;
                                     }
                                 }
+                                // Если дошли сюда - разрешаем переход по ссылке
                             });
                     } else {
                         // Для desktop используем hover
@@ -225,7 +263,7 @@ $(function () {
                             : (n(t).find(".nav-submenu").hide(0),
                               n(t).find(".submenu-indicator").removeClass("submenu-indicator-up"),
                               u.settings.submenuIndicator
-                                  ? n(t)
+                                  ? (n(t)
                                         .find(".submenu-indicator")
                                         .on(f, function (e) {
                                             return (
@@ -241,7 +279,57 @@ $(function () {
                                                       !1)
                                                     : (n(this).parent("a").parent("li").find(".submenu-indicator").removeClass("submenu-indicator-up"), void u.hideSubmenu(n(this).parent("a").parent("li"), "slide"))
                                             );
-                                        })
+                                        }),
+                                    // Обрабатываем клики по ссылкам для мобильных устройств
+                                    // Разрешаем переход по всем обычным ссылкам (без подменю или с нормальными href)
+                                    n(t)
+                                        .find(".nav-menu")
+                                        .children("li")
+                                        .children("a")
+                                        .off(l).off(c)
+                                        .on(f, function (i) {
+                                            var $link = n(this);
+                                            var $submenu = $link.siblings(".nav-submenu, .nav-dropdown");
+                                            var hasSubmenu = $submenu.length > 0;
+                                            var linkHref = $link.attr("href");
+                                            var isJavascriptLink = linkHref === "javascript:void(0);" || linkHref === "#" || !linkHref || linkHref === "";
+                                            
+                                            // Если нет подменю - разрешаем переход по ссылке
+                                            if (!hasSubmenu) {
+                                                // Разрешаем переход (не блокируем)
+                                                return true;
+                                            }
+                                            
+                                            // Если есть подменю и это обычная ссылка (не javascript) - разрешаем переход
+                                            if (hasSubmenu && !isJavascriptLink) {
+                                                // Разрешаем переход по ссылке (не блокируем)
+                                                return true;
+                                            }
+                                            
+                                            // Для javascript ссылок с подменю - не блокируем здесь,
+                                            // пусть обрабатывает submenu-indicator или пользователь кликнет еще раз
+                                            // Но если кликнули по самой ссылке (не по индикатору) - разрешаем переход
+                                            // если подменю уже открыто
+                                            var isSubmenuVisible = $submenu.css("display") !== "none" && $submenu.is(":visible");
+                                            if (isSubmenuVisible) {
+                                                // Подменю открыто - разрешаем переход (если это не javascript ссылка)
+                                                return !isJavascriptLink;
+                                            }
+                                            
+                                            // Подменю закрыто и это javascript ссылка - не блокируем,
+                                            // пусть submenu-indicator обработает открытие
+                                            return true;
+                                        }),
+                                    // Обрабатываем ссылки в dropdown (подменю) - всегда разрешаем переход
+                                    n(t)
+                                        .find(".nav-dropdown")
+                                        .children("li")
+                                        .children("a")
+                                        .off(l).off(c)
+                                        .on(f, function (i) {
+                                            // Всегда разрешаем переход по ссылкам в подменю
+                                            return true;
+                                        }))
                                   : k());
                 };
             (u.callback = function (n) {
